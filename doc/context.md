@@ -13,4 +13,4 @@
 - /search/dpt (when the user selects a dpt)
 - /search/dpt/degree (the user will select a dpt first and then a degree from that dpt)
 - /search/dpt/degree/subject (the user will select a dpt, then a degree in that dpt, and then a subject of that degree)
-- 
+- /add notes (when user presses the floating action button in )
