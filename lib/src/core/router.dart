@@ -45,9 +45,11 @@ final GoRouter appRouter = GoRouter(
         subId: state.pathParameters["subId"]!,
       ),
     ),
-    // add a note
-    GoRoute(path: "/add-note", builder: (context, state) => 
+    // view a resource
+    GoRoute(path: "/view-resource/:resourceId", builder: (context, state) => 
       const ViewResourcePage(resourceId: state.pathParameters["resourceId"])
-    )
+    ),
+    // add a resource
+    GoRoute(path: "/new-resource", builder: (context, state) => const NewResourcePage()),
   ]
 );
