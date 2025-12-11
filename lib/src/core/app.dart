@@ -8,10 +8,11 @@ class CampusGridApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: "Campus Grid",
-      theme: AppTheme.light,
-      home: const SplashPage()
-    );
+    return MaterialApp.router(routerConfig: appRouter, theme:lightTheme);
+    // return MaterialApp(
+    //   title: "Campus Grid",
+    //   theme: lightTheme,
+    //   home: const SplashPage()
+    // );
   }
 }

@@ -7,3 +7,6 @@ const Color bgSplash_buttons_headers_floatingActionBtn = Color(0x1565C0FF); // t
 const Color delete_text_btn = Color(0xD32F2FFF);
 const Color upvote_heart_count = Color(0xEF5350FF);
 const Color icons_surroundings = Color(0xE3F2FDFF);
+
+
+
