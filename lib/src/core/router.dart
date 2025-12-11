@@ -14,17 +14,25 @@ import "../features/resources/new_resource.dart";
 import "../features/resources/view_resource.dart";
 
 final GoRouter appRouter = GoRouter(
-  initialLocation: "/signup",
+  initialLocation: "/",
   routes: [
     GoRoute(path: "/", builder: (context, state) => const SplashPage()),
     GoRoute(path: "/get-started", builder: (context, state) => const GetStartedPage()),
     GoRoute(path: "/login", builder: (context, state) => const LoginPage()),
     GoRoute(path: "/signup", builder: (context, state) => const SignupPage()),
     GoRoute(path: "/home", builder: (context, state) => const HomePage()),
-    GoRoute(path: "/search", builder: (context, state) => const SearchPage()),
-    GoRoute(path: "/library", builder: (context, state) => const LibraryPage()),
+    // search is ganna need query params for searching and filtering
+    GoRoute(path: "/search", builder: (context, state) => SearchPage(
+      query: state.uri.queryParameters["query"],
+      type: state.uri.queryParameters["type"]
+    )),
+    GoRoute(path: "/library", builder: (context, state) => LibraryPage(
+      query: state.uri.queryParameters["query"],
+      sort: state.uri.queryParameters["sort"],
+    )),
     GoRoute(path: "/profile", builder: (context, state) => const ProfilePage()),
-    // degrees of a department:
+    // ganna need parameterized routes now
+    //degrees of a department:
     GoRoute(path: "/search/dpt/:dptId/degree", builder: (context, state) => 
       ListDegSubNotesPage(
         dptId: state.pathParameters["dptId"]!,
