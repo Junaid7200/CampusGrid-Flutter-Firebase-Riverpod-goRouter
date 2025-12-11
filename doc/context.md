@@ -10,7 +10,6 @@
 - /search (search tab)
 - /library (library tab)
 - /profile (profile tab)
-- /search/dpt (when the user selects a dpt)
 - /search/dpt/degree (the user will select a dpt first and then a degree from that dpt)
 - /search/dpt/degree/subject (the user will select a dpt, then a degree in that dpt, and then a subject of that degree)
 - /add notes (when user presses the floating action that is visible in home tab and several other tabs then the add notes page would open)
@@ -25,4 +24,10 @@
 - home -> lib/src/features/home/home.dart (two main sections, one horizontal scrollview for most liked cards using lib/src/shared/widgets/verstile_card.dart and below that, a recently added cards section also using lib/src/shared/widgets/verstile_card.dart which will be vertical scroll view instead of horizontal)
 - search -> lib/src/features/search/search.dart (this is where we will use lib/src/shared/widgets/search_dpt_card.dart. we will have 2 simple sections, a nice search bar and below that are the lib/src/shared/widgets/search_dpt_card.dart cards simply)
 - library -> lib/src/features/library/library.dart (2 sections, one search bar and then vertical scroll view of lib/src/shared/widgets/verstile_card.dart)
-- profile -> lib/src/features/profile/profile.dart (this page would show the user's uploads and total upvotes and logout and delete account options along with edit profile)
+- profile -> lib/src/features/profile/profile.dart (this page would show the user's uploads and total upvotes and logout and delete account options along with edit profile option to that leads to lib/src/features/profile/edit_profile.dart)
+
+Note: 
+
+1. the Search Bar will be from lib/src/shared/widgets/search_bar.dart.
+2. the lib/src/shared/widgets/search_dpt_card.dart will only be used in search tab, the user will be able to see all the departments there simply
+3. the search chaining is simple, the user selects a department, for that department, he sees the degrees offered by that department, then for those degrees, he will see the subjects taught in that degree, and for that subject, he will see the notes of that subject. so we would end up with 4 types of cards in total, a department card (which is lib/src/shared/widgets/search_dpt_card.dart), a degree card, a subject card, and a notes card (all three will be handled using lib/src/shared/widgets/verstile_card.dart) through a ton of, well props and conditional rendering based on the props if this was react native but I don't know how flutter works but I imagine its somewhat similar.
