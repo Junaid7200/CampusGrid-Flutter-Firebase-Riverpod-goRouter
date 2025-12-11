@@ -20,4 +20,9 @@
 
 - splash -> lib/src/features/startup/splash.dart
 - get_started -> lib/src/features/get_started.dart
-- login -> 
+- login -> lib/src/features/auth/login.dart
+- signup -> lib/src/features/auth/signup.dart
+- home -> lib/src/features/home/home.dart (two main sections, one horizontal scrollview for most liked cards using lib/src/shared/widgets/verstile_card.dart and below that, a recently added cards section also using lib/src/shared/widgets/verstile_card.dart which will be vertical scroll view instead of horizontal)
+- search -> lib/src/features/search/search.dart (this is where we will use lib/src/shared/widgets/search_dpt_card.dart. we will have 2 simple sections, a nice search bar and below that are the lib/src/shared/widgets/search_dpt_card.dart cards simply)
+- library -> lib/src/features/library/library.dart (2 sections, one search bar and then vertical scroll view of lib/src/shared/widgets/verstile_card.dart)
+- profile -> lib/src/features/profile/profile.dart (this page would show the user's uploads and total upvotes and logout and delete account options along with edit profile)
