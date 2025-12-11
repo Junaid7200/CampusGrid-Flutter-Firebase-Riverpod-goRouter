@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+// import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import "../features/startup/splash.dart";
@@ -14,7 +14,7 @@ import "../features/resources/new_resource.dart";
 import "../features/resources/view_resource.dart";
 
 final GoRouter appRouter = GoRouter(
-  initialLocation: "/",
+  initialLocation: "/signup",
   routes: [
     GoRoute(path: "/", builder: (context, state) => const SplashPage()),
     GoRoute(path: "/get-started", builder: (context, state) => const GetStartedPage()),
@@ -25,20 +25,20 @@ final GoRouter appRouter = GoRouter(
     GoRoute(path: "/library", builder: (context, state) => const LibraryPage()),
     GoRoute(path: "/profile", builder: (context, state) => const ProfilePage()),
     // degrees of a department:
-    GoRoute(path: "search/dpt/:dptId/degrees", builder: (context, state) => 
+    GoRoute(path: "/search/dpt/:dptId/degree", builder: (context, state) => 
       ListDegSubNotesPage(
         dptId: state.pathParameters["dptId"]!,
       ),
     ),
     // subjects of a degree
-    GoRoute(path: "search/dpt/:dptId/degree/:degId/subjects", builder: (context, state) =>
+    GoRoute(path: "/search/dpt/:dptId/degree/:degId/subject", builder: (context, state) =>
       ListDegSubNotesPage(
         dptId: state.pathParameters["dptId"]!,
         degId: state.pathParameters["degId"]!,
       ),
     ),
     // notes of a subject
-    GoRoute(path: "search/dpt/:dptId/degree/:degId/subject/:subId/notes", builder: (context, state) =>
+    GoRoute(path: "/search/dpt/:dptId/degree/:degId/subject/:subId/notes", builder: (context, state) =>
       ListDegSubNotesPage(
         dptId: state.pathParameters["dptId"]!,
         degId: state.pathParameters["degId"]!,
@@ -46,10 +46,10 @@ final GoRouter appRouter = GoRouter(
       ),
     ),
     // view a resource
-    GoRoute(path: "/view-resource/:resourceId", builder: (context, state) => 
-      const ViewResourcePage(resourceId: state.pathParameters["resourceId"])
+    GoRoute(path: "/view_resource/:resourceId", builder: (context, state) => 
+      ViewResourcePage(resourceId: state.pathParameters["resourceId"]!)
     ),
     // add a resource
-    GoRoute(path: "/new-resource", builder: (context, state) => const NewResourcePage()),
+    GoRoute(path: "/new_resource", builder: (context, state) => const NewResourcePage()),
   ]
 );
