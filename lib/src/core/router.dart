@@ -37,5 +37,17 @@ final GoRouter appRouter = GoRouter(
         degId: state.pathParameters["degId"]!,
       ),
     ),
+    // notes of a subject
+    GoRoute(path: "search/dpt/:dptId/degree/:degId/subject/:subId/notes", builder: (context, state) =>
+      ListDegSubNotesPage(
+        dptId: state.pathParameters["dptId"]!,
+        degId: state.pathParameters["degId"]!,
+        subId: state.pathParameters["subId"]!,
+      ),
+    ),
+    // add a note
+    GoRoute(path: "/add-note", builder: (context, state) => 
+      const ViewResourcePage(resourceId: state.pathParameters["resourceId"])
+    )
   ]
-)
+);
