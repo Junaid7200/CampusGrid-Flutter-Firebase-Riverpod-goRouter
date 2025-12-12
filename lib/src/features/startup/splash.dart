@@ -9,7 +9,15 @@ class SplashPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Scaffold(
       body: Center(
-        child: Text("Splash Page"),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Welcome to the Splash Page',
+              style: TextStyle(fontSize: 24),
+            ),
+          ],
+        )
       ),
     );
   }

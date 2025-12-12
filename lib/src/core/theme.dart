@@ -8,8 +8,17 @@ const Color delete_text_btn = Color(0xD32F2FFF);
 const Color upvote_heart_count = Color(0xEF5350FF);
 const Color icons_surroundings = Color(0xE3F2FDFF);
 
+
+
+
+
 final ThemeData appThemeLight = ThemeData(
-  brightness: Brightness.light,
-  primaryColor: bgSplash_buttons_headers_floatingActionBtn,
+  // useMaterial3: true,
+  colorScheme: ColorScheme.light(
+    primary: bgSplash_buttons_headers_floatingActionBtn,
+    onPrimary: getStarted_login_signup_bottomTabs_cards,
+    surface: getStarted_login_signup_bottomTabs_cards,
+    error: delete_text_btn,
+  ),
   scaffoldBackgroundColor: bg_main,
 );
