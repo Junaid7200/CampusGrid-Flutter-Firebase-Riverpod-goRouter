@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'router.dart';
 import 'theme.dart';
-import '../features/startup/splash.dart';
+// import '../features/startup/splash.dart';
 
 class CampusGridApp extends StatelessWidget {
   const CampusGridApp({super.key});
@@ -9,6 +9,7 @@ class CampusGridApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
       return MaterialApp.router(
+        debugShowCheckedModeBanner: false,
         title: 'Campus Grid',
         theme: appThemeLight, // refine this as you build screens
         routerConfig: appRouter,
