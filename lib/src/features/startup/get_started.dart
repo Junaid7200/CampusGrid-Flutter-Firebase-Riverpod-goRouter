@@ -54,7 +54,7 @@ class _GetStartedPageState extends State<GetStartedPage> {
             ),
           ),
           const Spacer(flex: 2),
-      
+
           Expanded(
             flex: 3,
             child: Container(
@@ -112,7 +112,7 @@ class _GetStartedPageState extends State<GetStartedPage> {
                         },
                       ),
                     ),
-      
+
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: List.generate(
@@ -120,7 +120,7 @@ class _GetStartedPageState extends State<GetStartedPage> {
                         (index) => buildDot(index, colors.primary),
                       ),
                     ),
-      
+
                     const SizedBox(
                       height: 40,
                     ), // Space between dots and button
