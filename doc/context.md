@@ -13,7 +13,6 @@
 - dynamic refetching (user instantly sees a new note uploaded by another user)
 - user should be able to search notes in his library as well
 
-
 ## Routes/Pages general structure
 
 - I assume splash screen doesn't require its own route
@@ -39,10 +38,20 @@
 - search -> lib/src/features/search/search.dart (this is where we will use lib/src/shared/widgets/search_dpt_card.dart. we will have 2 simple sections, a nice search bar and below that are the lib/src/shared/widgets/search_dpt_card.dart cards simply)
 - library -> lib/src/features/library/library.dart (2 sections, one search bar and then vertical scroll view of lib/src/shared/widgets/verstile_card.dart)
 - profile -> lib/src/features/profile/profile.dart (this page would show the user's uploads and total upvotes and logout and delete account options along with edit profile option to that leads to lib/src/features/profile/edit_profile.dart)
+- edit-profile -> lib/src/features/profile/edit_profile.dart
+- new_resource (add resource basically) -> lib/src/features/resources/new_resource.dart
+- view_resource -> lib/src/features/resources/view_resource.dart
+- degrees of a dpt list page -> lib/src/features/resource/list_deg_sub_notes.dart
+- subjects of a deg list page -> lib/src/features/resource/list_deg_sub_notes.dart
+- notes of a subject list page -> lib/src/features/resource/list_deg_sub_notes.dart
+- these above 3 will use lib/src/shared/widgets/verstile_card.dart and a lotta route params and conditional rendering sorta stuff
 
-## Note: 
+## Note
 
 1. the Search Bar will be from lib/src/shared/widgets/search_bar.dart.
 2. the lib/src/shared/widgets/search_dpt_card.dart will only be used in search tab, the user will be able to see all the departments there simply
 3. the search chaining is simple, the user selects a department, for that department, he sees the degrees offered by that department, then for those degrees, he will see the subjects taught in that degree, and for that subject, he will see the notes of that subject, upon pressing a note he will end up at lib/src/shared/features/resources/view_resource.dart.
 4. so we would end up with 4 types of cards in total, a department card (which is lib/src/shared/widgets/search_dpt_card.dart) only used in search.dart, a degree card, a subject card, and a notes card; all three will be handled using lib/src/shared/widgets/verstile_card.dart somehow through a ton of, well props and conditional rendering based on the props if this was react native but I don't know how flutter works but I imagine its somewhat similar.
+5. routes will be defined in lib/src/core/router.dart
+6. themes will be defined in lib/src/core/themes.dart
+7. main entry point and the MaterialApp widget sits in lib/src/core/app.dart, will use .router to attach the router and themes to the material app widget.

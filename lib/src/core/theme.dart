@@ -8,5 +8,8 @@ const Color delete_text_btn = Color(0xD32F2FFF);
 const Color upvote_heart_count = Color(0xEF5350FF);
 const Color icons_surroundings = Color(0xE3F2FDFF);
 
-
-
+final ThemeData appThemeLight = ThemeData(
+  brightness: Brightness.light,
+  primaryColor: bgSplash_buttons_headers_floatingActionBtn,
+  scaffoldBackgroundColor: bg_main,
+);
