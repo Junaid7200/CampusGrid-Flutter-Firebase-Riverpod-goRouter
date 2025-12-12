@@ -55,3 +55,15 @@
 5. routes will be defined in lib/src/core/router.dart
 6. themes will be defined in lib/src/core/themes.dart
 7. main entry point and the MaterialApp widget sits in lib/src/core/app.dart, will use .router to attach the router and themes to the material app widget.
+
+## Firebase setup
+
+1. make a firebase project.
+2. create app in that firebase project (name of app should be the android namespace from android/app/build.gradle.kts)
+3. put id("com.google.gms.google-services") in android/app/build.gradle.kts as well in the plugins object
+4. put in firebase dependencies into pubspec.yaml (  firebase_core: ^4.2.1, firebase_auth: ^6.1.2, cloud_firestore: ^6.1.0)
+5. download that google-services.json file from firebase project and add it at androi/app/
+6. enter dart pub global activate flutterfire_cli in terminal and use flutterfire --version to check
+7. npm install -g firebase-tools in terminal and then firebase login in terminal as well
+8. then finally do flutterfire configure --project <project-id> --platforms android
+9. you will see a weird kinda firebase_options.dart file in lib then.

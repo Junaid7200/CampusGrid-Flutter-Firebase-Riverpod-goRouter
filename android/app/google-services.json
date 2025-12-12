@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "786486152562",
+    "project_id": "campus-grid-95dd6",
+    "storage_bucket": "campus-grid-95dd6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:786486152562:android:2c29379d1d55a12b46e1eb",
+        "android_client_info": {
+          "package_name": "com.example.campus_grid"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0bdnd0JPWflR02vpvoqZcOX5vJN5YjLI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
