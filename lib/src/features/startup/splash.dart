@@ -1,13 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 
-class SplashPage extends StatelessWidget {
+
+class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
+  @override
+  State<SplashPage> createState() => _SplashPageState();
+}
+
+
+class _SplashPageState extends State<SplashPage> {
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(seconds: 5), () {
+      if (!mounted) return;
+      // TODO: replace with auth/first-time check later
+      context.go('/get-started');
+    });
+  }
 
 
   @override
   Widget build(BuildContext context) {
-    const String splash_icon = 'assets/images/startup/Splash_Icon.svg';
+    const String splashIcon = 'assets/images/startup/Splash_Icon.svg';
     final colors = Theme.of(context).colorScheme;
     // debugPrint('primary = ${Theme.of(context).colorScheme.primary.value.toRadixString(16)}');
 
@@ -27,7 +44,7 @@ class SplashPage extends StatelessWidget {
               ),
               child: Center(
                 child: SvgPicture.asset(
-                  splash_icon,
+                  splashIcon,
                   width: 100,
                   height: 100,
                 ),
@@ -58,3 +75,13 @@ class SplashPage extends StatelessWidget {
     );
   }
 }
+
+
+
+
+
+
+
+
+
+
