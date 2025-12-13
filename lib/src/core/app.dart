@@ -11,7 +11,7 @@ class CampusGridApp extends StatelessWidget {
       return MaterialApp.router(
         debugShowCheckedModeBanner: false,
         title: 'Campus Grid',
-        theme: appThemeLight, // refine this as you build screens
+        theme: appThemeLight,
         routerConfig: appRouter,
     );
     // return MaterialApp(

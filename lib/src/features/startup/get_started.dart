@@ -1,3 +1,4 @@
+import 'package:campus_grid/src/shared/widgets/button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
@@ -116,38 +117,17 @@ class _GetStartedPageState extends State<GetStartedPage> {
                     ),
 
                     const SizedBox(height: 40),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 55,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          if (_currentPage < getStartedTexts.length - 1) {
-                            _controller.nextPage(
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeIn,
-                            );
-                          } else {
-                            print("Navigate to Login");
-                            context.go('/login');
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: colors.primary,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          elevation: 0,
-                        ),
-                        child: Text(
-                          _currentPage == 0 ? "Get Started" : _currentPage == 2 ? "Login" : "Next",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
+                    CustomButton(
+                      text: _currentPage == 0 ? "Get Started" : _currentPage == 2 ? "Sign Up" : "Next",
+                      trailingIcon: _currentPage == 0 ? Icons.chevron_right : null,
+                      onPressed: () {
+                        if(_currentPage < getStartedTexts.length - 1) {
+                          _controller.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+                        } else {
+                          context.push('/signup');
+                        }
+                      }
+                    )
                   ],
                 ),
               ),

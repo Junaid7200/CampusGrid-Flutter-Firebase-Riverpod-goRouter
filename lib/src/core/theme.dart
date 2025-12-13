@@ -20,3 +20,50 @@ final ThemeData appThemeLight = ThemeData(
   ),
   scaffoldBackgroundColor: bg_main,
 );
+
+
+
+
+
+
+
+
+/*
+
+Primary Colors
+primary: Main brand color - used for:
+
+AppBar background
+FloatingActionButton
+Prominent buttons (ElevatedButton)
+Active states (selected tabs, checkboxes)
+Headers
+onPrimary: Text/icons on top of primary color
+
+If primary is blue, onPrimary is usually white for contrast
+Surface Colors
+surface: Background color for "surfaces" like:
+
+Cards
+Dialogs
+Bottom sheets
+Menus
+Not the main scaffold background (that's separate)
+onSurface: Text/icons on surfaces (usually dark gray or black)
+
+Secondary Colors
+secondary: Accent color for less prominent elements:
+
+Switches
+Sliders
+Progress indicators
+Highlighting selections
+Less important than primary (used sparingly)
+onSecondary: Text/icons on secondary color backgrounds
+
+Error Colors
+error: Destructive actions and error states
+onError: Text on error backgrounds
+
+
+*/
