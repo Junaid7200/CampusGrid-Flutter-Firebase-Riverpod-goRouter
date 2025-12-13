@@ -19,6 +19,22 @@ final ThemeData appThemeLight = ThemeData(
     onSecondary: bgSplash_buttons_headers_floatingActionBtn,
   ),
   scaffoldBackgroundColor: bg_main,
+
+  // elevated button theme
+  elevatedButtonTheme: ElevatedButtonThemeData(
+    style: ElevatedButton.styleFrom(
+      backgroundColor: bgSplash_buttons_headers_floatingActionBtn,
+      foregroundColor: getStarted_login_signup_bottomTabs_cards,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+      elevation: 0,
+      minimumSize: const Size(double.infinity, 55),
+      textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      disabledBackgroundColor: bgSplash_buttons_headers_floatingActionBtn
+          .withAlpha((0.6 * 255).toInt()),
+      disabledForegroundColor: getStarted_login_signup_bottomTabs_cards
+          .withAlpha((0.7 * 255).toInt()),
+    ),
+  ),
 );
 
 
