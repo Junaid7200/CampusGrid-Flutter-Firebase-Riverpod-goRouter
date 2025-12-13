@@ -46,11 +46,7 @@ class _GetStartedPageState extends State<GetStartedPage> {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Center(
-              child: SvgPicture.asset(
-                getStartedIcon,
-                width: 130,
-                height: 130,
-              ),
+              child: SvgPicture.asset(getStartedIcon, width: 130, height: 130),
             ),
           ),
           const Spacer(flex: 2),
@@ -68,8 +64,6 @@ class _GetStartedPageState extends State<GetStartedPage> {
                 boxShadow: [
                   BoxShadow(
                     color: Colors.grey.withAlpha(30),
-                    blurRadius: 10,
-                    offset: const Offset(0, -5),
                   ),
                 ],
               ),
@@ -121,9 +115,7 @@ class _GetStartedPageState extends State<GetStartedPage> {
                       ),
                     ),
 
-                    const SizedBox(
-                      height: 40,
-                    ), // Space between dots and button
+                    const SizedBox(height: 40),
                     SizedBox(
                       width: double.infinity,
                       height: 55,
@@ -147,12 +139,7 @@ class _GetStartedPageState extends State<GetStartedPage> {
                           elevation: 0,
                         ),
                         child: Text(
-                          // Logic: Change text based on page
-                          _currentPage == 0
-                              ? "Get Started"
-                              : _currentPage == 2
-                              ? "Login"
-                              : "Next",
+                          _currentPage == 0 ? "Get Started" : _currentPage == 2 ? "Login" : "Next",
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 18,
@@ -171,13 +158,12 @@ class _GetStartedPageState extends State<GetStartedPage> {
     );
   }
 
-  // --- HELPER FUNCTION FOR DOTS ---
   Widget buildDot(int index, Color color) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       margin: const EdgeInsets.symmetric(horizontal: 4),
       height: 8,
-      // If active, width is 32 (pill), else 8 (circle)
+      // the pill is 32 width and dot is 8, both got the smae height though
       width: _currentPage == index ? 32 : 8,
       decoration: BoxDecoration(
         color: _currentPage == index ? color : color.withAlpha(50),
