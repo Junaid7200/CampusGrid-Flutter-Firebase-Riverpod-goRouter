@@ -14,7 +14,7 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 5), () {
+    Future.delayed(const Duration(seconds: 60), () {
       if (!mounted) return;
       // TODO: replace with auth/first-time check later
       context.go('/get-started');
