@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:campus_grid/src/shared/widgets/auth_img.dart';
 
 
 class LoginPage extends StatelessWidget {
@@ -11,6 +12,7 @@ class LoginPage extends StatelessWidget {
         child: Column(
           children: [
             Text('Login Page'),
+            AuthPagesImage(),
           ],
         ),
       ),

@@ -12,7 +12,7 @@ class CustomTextField extends StatelessWidget {
     Key? key,
     required this.labelText,
     required this.hintText,
-    required this.iconData,
+    required this.iconData ,
     this.obscureText = false,
     this.keyboardType = TextInputType.text,
     required this.controller,
@@ -25,14 +25,21 @@ class CustomTextField extends StatelessWidget {
       obscureText: obscureText,
       keyboardType: keyboardType,
       decoration: InputDecoration(
+        floatingLabelBehavior: FloatingLabelBehavior.always,
         labelText: labelText,
         hintText: hintText,
-        prefixIcon: Icon(iconData),
+        hintStyle: TextStyle(color: Color(0xFF9E9E9E)),
+        prefixIcon: Icon(iconData, color: Color(0xFF9E9E9E)),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8.0),
+          borderRadius: BorderRadius.circular(12.0),
+          borderSide: BorderSide(
+            color: Color(0xFF9E9E9E),
+            width: 5.0,
+
+          ),
         ),
         filled: true,
-        fillColor: Colors.white,
+        fillColor: Color(0xFFF9FAFB),
       ),
     );
   }

@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 
 
 class AuthPagesImage extends StatelessWidget {
+  const AuthPagesImage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -13,12 +14,13 @@ class AuthPagesImage extends StatelessWidget {
       width: 100,
       height: 100,
       decoration: BoxDecoration(
-        color: colors.primary.withAlpha(30),
+        color: Color(0xFFE3F2FD),
         shape: BoxShape.circle,
       ),
       child: Center(
         child: SvgPicture.asset(
           splashIcon,
+          colorFilter: ColorFilter.mode(colors.primary, BlendMode.srcIn),
           width: 60,
           height: 60,
         ),
