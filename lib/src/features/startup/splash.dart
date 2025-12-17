@@ -17,8 +17,10 @@ class _SplashPageState extends State<SplashPage> {
     super.initState();
     _checkAuthState();
   }
+  
   void _checkAuthState() async {
-    await Future.delayed(const Duration(seconds: 10));
+    await FirebaseAuth.instance.signOut();
+    await Future.delayed(const Duration(seconds: 5));
     if (!mounted) return;
     FirebaseAuth.instance.authStateChanges().listen((User? user) {
       if (user == null) {

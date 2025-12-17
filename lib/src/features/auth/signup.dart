@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:campus_grid/src/shared/widgets/auth_img.dart';
 import 'package:campus_grid/src/shared/widgets/text_field.dart';
@@ -14,9 +15,53 @@ class SignupPage extends StatefulWidget {
 
 class _SignupPageState extends State<SignupPage> {
   final _formKey = GlobalKey<FormState>();
+  bool _isLoading = false;
   final TextEditingController _name_controller = TextEditingController();
   final TextEditingController _email_controller = TextEditingController();
   final TextEditingController _password_controller = TextEditingController();
+
+  void _handleSignup() async {
+    if (_formKey.currentState!.validate()) {
+      print('Name: ${_name_controller.text}');
+      print('Email: ${_email_controller.text}');
+      print('Password: ${_password_controller.text}');
+      setState(() {
+        _isLoading = true;
+      });
+      try {
+        final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: _email_controller.text,
+          password: _password_controller.text,
+        );
+          await userCredential.user?.updateDisplayName(_name_controller.text.trim());
+        print('User registered: ${userCredential}');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Signup successful! Welcome, ${_name_controller.text}')),
+          );
+          context.go('/home');
+        }
+      } on FirebaseAuthException catch (e) {
+        String message = "Signup failed";
+        if (e.code == 'weak-password') {
+          message = 'The password provided is too weak.';
+        } else if (e.code == 'email-already-in-use') {
+          message = 'The account already exists for that email.';
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message)),
+        );
+      } catch (e) {
+        print(e);
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +138,7 @@ class _SignupPageState extends State<SignupPage> {
                       },
                     ),
                     SizedBox(height: 24),
-                    CustomButton(text: "Sign Up", onPressed: () {}),
+                    CustomButton(text: "Sign Up", onPressed: _handleSignup, isLoading: _isLoading),
                     SizedBox(height: 24),
                     CustomOutlinedButton(
                       text: "Continue with Google",

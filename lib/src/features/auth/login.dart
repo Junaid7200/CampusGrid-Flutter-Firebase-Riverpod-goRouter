@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:campus_grid/src/shared/widgets/auth_img.dart';
 import 'package:campus_grid/src/shared/widgets/text_field.dart';
 import 'package:campus_grid/src/shared/widgets/button.dart';
 import 'package:campus_grid/src/shared/widgets/outlined_button.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -14,8 +16,53 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
+  bool _isLoading = false;
   final TextEditingController _email_controller = TextEditingController();
   final TextEditingController _password_controller = TextEditingController();
+
+  Future<void> _handleLogin() async {
+    if (_formKey.currentState!.validate()) {
+      print('Email: ${_email_controller.text}');
+      print('Password: ${_password_controller.text}');
+      setState(() {
+        _isLoading = true;
+      });
+      try {
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: _email_controller.text,
+          password: _password_controller.text,
+        );
+        print('User logged in successfully');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Login successful! Welcome back.')),
+          );
+          context.go('/home');
+        }
+      } on FirebaseAuthException catch (e) {
+        String message = "Login failed";
+        if (e.code == 'user-not-found') {
+          message = 'No user found for that email.';
+        } else if (e.code == 'wrong-password') {
+          message = 'Wrong password provided for that user.';
+        }
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(message)));
+      } catch (e) {
+        print(e);
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      }
+    }
+  }
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +136,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ],
                     ),
-                    CustomButton(text: "Login", onPressed: () {}),
+                    CustomButton(text: "Login", onPressed: _handleLogin, isLoading: _isLoading),
                     SizedBox(height: 24),
                     CustomOutlinedButton(
                       text: "Continue with Google",
@@ -107,7 +154,7 @@ class _LoginPageState extends State<LoginPage> {
                           child: Text("Signup"),
                         ),
                       ],
-                    )
+                    ),
                   ],
                 ),
               ),
