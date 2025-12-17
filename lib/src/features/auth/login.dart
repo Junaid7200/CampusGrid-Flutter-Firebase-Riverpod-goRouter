@@ -61,8 +61,30 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-
-
+  Future<void> _handleGoogleLogin() async {
+    setState(() => _isLoading = true);
+    try {
+      await GoogleSignIn.instance
+          .initialize(); // call once before using authenticate
+      final GoogleSignInAccount account = await GoogleSignIn.instance
+          .authenticate();
+      final auth = account.authentication; // contains idToken only
+      final credential = GoogleAuthProvider.credential(idToken: auth.idToken);
+      await FirebaseAuth.instance.signInWithCredential(credential);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Login with Google successful! Welcome back.'),
+          ),
+        );
+        context.go('/home');
+      }
+    } catch (e) {
+      debugPrint('Google sign-in failed: $e');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -136,12 +158,16 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ],
                     ),
-                    CustomButton(text: "Login", onPressed: _handleLogin, isLoading: _isLoading),
+                    CustomButton(
+                      text: "Login",
+                      onPressed: _handleLogin,
+                      isLoading: _isLoading,
+                    ),
                     SizedBox(height: 24),
                     CustomOutlinedButton(
                       text: "Continue with Google",
                       leadingIcon: FontAwesomeIcons.google,
-                      onPressed: () {},
+                      onPressed: () => _handleGoogleLogin(),
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
