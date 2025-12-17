@@ -7,6 +7,7 @@ import 'package:campus_grid/src/shared/widgets/outlined_button.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'dart:async';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -19,6 +20,31 @@ class _LoginPageState extends State<LoginPage> {
   bool _isLoading = false;
   final TextEditingController _email_controller = TextEditingController();
   final TextEditingController _password_controller = TextEditingController();
+  
+  // GoogleSignIn instance
+  bool _isGoogleSignInInitialized = false;
+  StreamSubscription<GoogleSignInAuthenticationEvent>? _authEventSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeGoogleSignIn();
+  }
+
+  @override
+  void dispose() {
+    _authEventSubscription?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _initializeGoogleSignIn() async {
+    try {
+      await GoogleSignIn.instance.initialize();
+      _isGoogleSignInInitialized = true;
+    } catch (e) {
+      print('Google Sign-In initialization error: $e');
+    }
+  }
 
   Future<void> _handleLogin() async {
     if (_formKey.currentState!.validate()) {
@@ -62,27 +88,111 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _handleGoogleLogin() async {
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+    });
+    
     try {
-      await GoogleSignIn.instance
-          .initialize(); // call once before using authenticate
-      final GoogleSignInAccount account = await GoogleSignIn.instance
-          .authenticate();
-      final auth = account.authentication; // contains idToken only
-      final credential = GoogleAuthProvider.credential(idToken: auth.idToken);
+      // Ensure Google Sign-In is initialized
+      if (!_isGoogleSignInInitialized) {
+        await _initializeGoogleSignIn();
+      }
+      
+      // Create a Completer to handle the event-driven API
+      final Completer<GoogleSignInAccount?> completer = Completer<GoogleSignInAccount?>();
+      
+      // Listen to authentication events
+      _authEventSubscription?.cancel();
+      _authEventSubscription = GoogleSignIn.instance.authenticationEvents.listen((event) {
+        if (event is GoogleSignInAuthenticationEventSignIn) {
+          if (!completer.isCompleted) {
+            completer.complete(event.user);
+          }
+        }
+      });
+      
+      // Trigger the authentication
+      await GoogleSignIn.instance.authenticate();
+      
+      // Wait for the user from the event stream
+      final GoogleSignInAccount? googleUser = await completer.future.timeout(
+        Duration(seconds: 30),
+        onTimeout: () => null,
+      );
+      
+      // Cancel the subscription
+      _authEventSubscription?.cancel();
+      
+      if (googleUser == null) {
+        // User canceled the sign-in
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+      
+      // Get the authentication tokens (synchronous in v7)
+      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+      
+      // Create a new credential for Firebase (only idToken is required)
+      final credential = GoogleAuthProvider.credential(
+        idToken: googleAuth.idToken,
+      );
+      
+      // Sign in to Firebase with the Google credential
       await FirebaseAuth.instance.signInWithCredential(credential);
+      
+      print('Google sign-in successful');
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Login with Google successful! Welcome back.'),
-          ),
+          SnackBar(content: Text('Login successful! Welcome to Campus Grid.')),
         );
         context.go('/home');
       }
+      
+    } on GoogleSignInException catch (e) {
+      // Handle Google Sign-In specific exceptions
+      String message = "Google sign-in failed";
+      if (e.code == GoogleSignInExceptionCode.canceled) {
+        message = 'Sign-in was canceled';
+      } else if (e.code == GoogleSignInExceptionCode.clientConfigurationError) {
+        message = 'Configuration error. Please contact support.';
+      }
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message)),
+        );
+      }
+      print('Google sign-in exception: ${e.code} - ${e.description}');
+      
+    } on FirebaseAuthException catch (e) {
+      String message = "Firebase authentication failed";
+      if (e.code == 'account-exists-with-different-credential') {
+        message = 'An account already exists with the same email address.';
+      } else if (e.code == 'invalid-credential') {
+        message = 'Invalid credential. Please try again.';
+      }
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message)),
+        );
+      }
     } catch (e) {
-      debugPrint('Google sign-in failed: $e');
+      print('Error during Google sign-in: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('An error occurred. Please try again.')),
+        );
+      }
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -168,6 +278,7 @@ class _LoginPageState extends State<LoginPage> {
                       text: "Continue with Google",
                       leadingIcon: FontAwesomeIcons.google,
                       onPressed: () => _handleGoogleLogin(),
+                      isLoading: _isLoading,
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
