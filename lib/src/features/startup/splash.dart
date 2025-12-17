@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 
 class SplashPage extends StatefulWidget {
@@ -14,10 +15,17 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 5), () {
-      if (!mounted) return;
-      // TODO: replace with auth/first-time check later
-      context.go('/get-started');
+    _checkAuthState();
+  }
+  void _checkAuthState() async {
+    await Future.delayed(const Duration(seconds: 10));
+    if (!mounted) return;
+    FirebaseAuth.instance.authStateChanges().listen((User? user) {
+      if (user == null) {
+        GoRouter.of(context).go('/get-started');
+      } else {
+        GoRouter.of(context).go('/home');
+      }
     });
   }
 
