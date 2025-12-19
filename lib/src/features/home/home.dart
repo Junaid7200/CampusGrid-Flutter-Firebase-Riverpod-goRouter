@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:campus_grid/src/shared/widgets/home_header.dart';
-
+import 'package:campus_grid/src/shared/widgets/verstile_card.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -9,7 +9,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
   final User _user = FirebaseAuth.instance.currentUser!;
   @override
   Widget build(BuildContext context) {
@@ -28,8 +27,7 @@ class _HomePageState extends State<HomePage> {
                   bottomRight: Radius.circular(20),
                 ),
               ),
-              child: 
-              Column(
+              child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -46,7 +44,8 @@ class _HomePageState extends State<HomePage> {
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                        Text("${_user.displayName}",
+                        Text(
+                          "${_user.displayName}",
                           style: TextStyle(
                             color: colors.onPrimary,
                             fontSize: 24,
@@ -60,20 +59,51 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             // heading: Most liked notes
-            HomeHeader(
-              heading: "Most Liked Notes",
-              onActionPressed: () {},
-            ),
+            HomeHeader(heading: "Most Liked Notes", onActionPressed: () {}),
             // list of most liked notes
-            //heading: Recently added notes
-            HomeHeader(
-              heading: "Recently Added Notes",
-              onActionPressed: () {},
+            Column(
+              children: [
+                VerstileCard(
+                  title: "Introduction to Flutter",
+                  subtitle: "Learn the basics of Flutter development.",
+                  cardType: "myNote",
+                  // icon: Icons.description_outlined,
+                  likesCount: 120,
+                  resourcesCount: 5,
+                ),
+                VerstileCard(
+                  title: "Advanced Dart Programming",
+                  subtitle: "Deep dive into Dart language features.",
+                  cardType: "note",
+                  // icon: Icons.description_outlined,
+                  likesCount: 95,
+                  resourcesCount: 3,
+                ),
+                // subject type card:
+                VerstileCard(
+                  title: "Data Structures",
+                  subtitle: "Comprehensive resources on data structuresadsffffffffffffffffffffffffffffffffffffffffffffff.",
+                  cardType: "subject",
+                  // icon: Icons.menu_book_outlined,
+                  resourcesCount: 20,
+                ),
+                // degree type card:
+                VerstileCard(
+                  title: "Bachelor of Computer Science",
+                  subtitle: "All resources for BCS students.",
+                  cardType: "degree",
+                  // icon: Icons.school_outlined,
+                  resourcesCount: 50,
+                ),
+              ],
             ),
+
+            //heading: Recently added notes
+            HomeHeader(heading: "Recently Added Notes", onActionPressed: () {}),
             // list of recently added notes
           ],
         ),
-      )
+      ),
     );
   }
 }
