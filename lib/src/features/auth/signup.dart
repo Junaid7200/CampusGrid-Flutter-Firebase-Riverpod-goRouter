@@ -18,6 +18,7 @@ class SignupPage extends StatefulWidget {
 class _SignupPageState extends State<SignupPage> {
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
+  bool _isGoogleLoading = false;
   final TextEditingController _name_controller = TextEditingController();
   final TextEditingController _email_controller = TextEditingController();
   final TextEditingController _password_controller = TextEditingController();
@@ -98,7 +99,7 @@ class _SignupPageState extends State<SignupPage> {
 
   Future<void> _handleGoogleLogin() async {
     setState(() {
-      _isLoading = true;
+      _isGoogleLoading = true;
     });
 
     try {
@@ -137,7 +138,7 @@ class _SignupPageState extends State<SignupPage> {
       if (googleUser == null) {
         // User canceled the sign-in
         setState(() {
-          _isLoading = false;
+          _isGoogleLoading = false;
         });
         return;
       }
@@ -199,7 +200,7 @@ class _SignupPageState extends State<SignupPage> {
     } finally {
       if (mounted) {
         setState(() {
-          _isLoading = false;
+          _isGoogleLoading = false;
         });
       }
     }
@@ -290,7 +291,7 @@ class _SignupPageState extends State<SignupPage> {
                       text: "Continue with Google",
                       leadingIcon: FontAwesomeIcons.google,
                       onPressed: () => _handleGoogleLogin(),
-                      isLoading: _isLoading,
+                      isLoading: _isGoogleLoading,
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
