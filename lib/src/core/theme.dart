@@ -53,6 +53,33 @@ final ThemeData appThemeLight = ThemeData(
           .withAlpha((0.6 * 255).round()),
     ),
   ),
+  textTheme: const TextTheme(
+    titleMedium: TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+      color: Color(0xFF1F2937),
+    ),
+  ),
+
+  inputDecorationTheme: InputDecorationTheme(
+    hintStyle: const TextStyle(color: Color(0xFF9E9E9E)),
+    prefixIconColor: const Color(0xFF9E9E9E),
+    suffixIconColor: const Color(0xFF9E9E9E),
+    filled: true,
+    fillColor: const Color(0xFFF9FAFB),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(8),
+      borderSide: const BorderSide(color: Color(0xFFE5E7EB), width: 1.0),
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(8),
+      borderSide: const BorderSide(color: Color(0xFFE5E7EB), width: 1.0),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(8),
+      borderSide: const BorderSide(color: Color(0xFF9E9E9E), width: 1.5),
+    ),
+  ),
 );
 
 

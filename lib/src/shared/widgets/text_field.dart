@@ -35,17 +35,12 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          widget.labelText,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: Color(0xFF1F2937),
-          ),
-        ),
+        Text(widget.labelText, style: theme.textTheme.bodyLarge),
         const SizedBox(height: 8),
         TextFormField(
           controller: widget.controller,
@@ -54,14 +49,15 @@ class _CustomTextFieldState extends State<CustomTextField> {
           validator: widget.validator,
           decoration: InputDecoration(
             hintText: widget.hintText,
-            hintStyle: const TextStyle(color: Color(0xFF9E9E9E)),
-            prefixIcon: Icon(widget.iconData, color: const Color(0xFF9E9E9E)),
+            prefixIcon: Icon(widget.iconData),
             suffixIcon: widget.obscureText
                 ? IconButton(
                     icon: Icon(
                       _isObscured ? Icons.visibility_off : Icons.visibility,
-                      color: const Color(0xFF9E9E9E),
                     ),
+                    color:
+                        theme.inputDecorationTheme.suffixIconColor ??
+                        theme.hintColor,
                     onPressed: () {
                       setState(() {
                         _isObscured = !_isObscured;
@@ -69,29 +65,6 @@ class _CustomTextFieldState extends State<CustomTextField> {
                     },
                   )
                 : null,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.0),
-              borderSide: const BorderSide(
-                color: Color(0xFFE5E7EB),
-                width: 1.0,
-              ),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.0),
-              borderSide: const BorderSide(
-                color: Color(0xFFE5E7EB),
-                width: 1.0,
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.0),
-              borderSide: const BorderSide(
-                color: Color(0xFF9E9E9E),
-                width: 1.5,
-              ),
-            ),
-            filled: true,
-            fillColor: const Color(0xFFF9FAFB),
           ),
         ),
       ],
