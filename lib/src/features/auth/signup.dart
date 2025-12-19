@@ -34,6 +34,9 @@ class _SignupPageState extends State<SignupPage> {
 
   @override
   void dispose() {
+    _name_controller.dispose();
+    _email_controller.dispose();
+    _password_controller.dispose();
     _authEventSubscription?.cancel();
     super.dispose();
   }

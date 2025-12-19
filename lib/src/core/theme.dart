@@ -80,6 +80,23 @@ final ThemeData appThemeLight = ThemeData(
       borderSide: const BorderSide(color: Color(0xFF9E9E9E), width: 1.5),
     ),
   ),
+  // Add this to your appThemeLight in theme.dart
+  navigationBarTheme: NavigationBarThemeData(
+    backgroundColor: getStarted_login_signup_bottomTabs_cards,
+    indicatorColor: icons_surroundings,
+    indicatorShape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12),
+    ),
+    iconTheme: WidgetStateProperty.resolveWith((states) {
+      if (states.contains(WidgetState.selected)) {
+        return const IconThemeData(
+          color: bgSplash_buttons_headers_floatingActionBtn,
+        );
+      }
+      return const IconThemeData(color: Colors.grey);
+    }),
+    labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
+  ),
 );
 
 

@@ -12,6 +12,7 @@ import "../features/profile/profile.dart";
 import "../features/resources/list_deg_sub_notes.dart";
 import "../features/resources/new_resource.dart";
 import "../features/resources/view_resource.dart";
+import './layout/home_shell.dart';
 
 
 final GoRouter appRouter = GoRouter(
@@ -21,17 +22,41 @@ final GoRouter appRouter = GoRouter(
     GoRoute(path: "/get-started", builder: (context, state) => const GetStartedPage()),
     GoRoute(path: "/login", builder: (context, state) => const LoginPage()),
     GoRoute(path: "/signup", builder: (context, state) => const SignupPage()),
-    GoRoute(path: "/home", builder: (context, state) => const HomePage()),
-    // search is ganna need query params for searching and filtering
-    GoRoute(path: "/search", builder: (context, state) => SearchPage(
-      query: state.uri.queryParameters["query"],
-      type: state.uri.queryParameters["type"]
-    )),
-    GoRoute(path: "/library", builder: (context, state) => LibraryPage(
-      query: state.uri.queryParameters["query"],
-      sort: state.uri.queryParameters["sort"],
-    )),
-    GoRoute(path: "/profile", builder: (context, state) => const ProfilePage()),
+
+    // BOTTOM NAVIGATION SHELL ROUTES
+    StatefulShellRoute.indexedStack(
+      builder: (context, state, navigationShell) {
+        return ScaffoldWithHomeShell(navigationShell: navigationShell);
+      },
+      branches: [
+        StatefulShellBranch(
+          routes: [
+            GoRoute(path: "/home", builder: (context, state) => const HomePage()),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(path: "/search", builder: (context, state) => SearchPage(
+              query: state.uri.queryParameters["query"],
+              type: state.uri.queryParameters["type"]
+            )),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(path: "/library", builder: (context, state) => LibraryPage(
+              query: state.uri.queryParameters["query"],
+              sort: state.uri.queryParameters["sort"],
+            )),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(path: "/profile", builder: (context, state) => const ProfilePage()),
+          ],
+        ),
+      ]
+    ),
     // ganna need parameterized routes now
     //degrees of a department:
     GoRoute(path: "/search/dpt/:dptId/degree", builder: (context, state) => 

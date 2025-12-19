@@ -34,6 +34,8 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void dispose() {
+    _email_controller.dispose();
+    _password_controller.dispose();
     _authEventSubscription?.cancel();
     super.dispose();
   }
