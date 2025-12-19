@@ -8,6 +8,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -64,9 +65,21 @@ class _SignupPageState extends State<SignupPage> {
               email: _email_controller.text,
               password: _password_controller.text,
             );
-        await userCredential.user?.updateDisplayName(
-          _name_controller.text.trim(),
-        );
+        final user = userCredential.user;
+        // await user?.sendEmailVerification();
+        if (user != null) {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .set({
+                'displayName': _name_controller.text.trim(),
+                'email': _email_controller.text.trim(),
+                'createdAt': FieldValue.serverTimestamp(),
+                'notesCount': 0,
+                'likesReceived': 0,
+                'savedNotes': 0,
+              });
+        }
         print('User registered: ${userCredential}');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -154,9 +167,20 @@ class _SignupPageState extends State<SignupPage> {
         idToken: googleAuth.idToken,
       );
 
-      // Sign in to Firebase with the Google credential
-      await FirebaseAuth.instance.signInWithCredential(credential);
-
+      final userCredential = await FirebaseAuth.instance.signInWithCredential(
+        credential,
+      );
+      final user = userCredential.user;
+      if (user != null) {
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'displayName': user.displayName ?? 'No Name',
+          'email': user.email,
+          'createdAt': FieldValue.serverTimestamp(),
+            'notesCount': 0,
+            'likesReceived': 0,
+            'savedNotes': 0,
+        }, SetOptions(merge: true));
+      }
       print('Google sign-in successful');
 
       if (mounted) {
