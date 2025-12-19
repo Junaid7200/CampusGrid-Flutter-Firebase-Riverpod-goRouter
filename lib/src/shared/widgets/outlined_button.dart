@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 class CustomOutlinedButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;
@@ -21,15 +20,8 @@ class CustomOutlinedButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      height: 55,
       child: OutlinedButton(
         onPressed: isLoading ? null : onPressed,
-        style: OutlinedButton.styleFrom(
-          side: BorderSide(
-            color: Theme.of(context).colorScheme.primary,
-            width: 2.0,
-          ),
-        ),
         child: isLoading
             ? SizedBox(
                 height: 24,
@@ -46,16 +38,13 @@ class CustomOutlinedButton extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (leadingIcon != null) ...[
-                    Icon(leadingIcon, size: 22, color: Theme.of(context).colorScheme.primary),
+                    Icon(leadingIcon, size: 22),
                     const SizedBox(width: 12),
                   ],
-                  Text(
-                    text,
-                    style: TextStyle(color: Theme.of(context).colorScheme.primary, fontSize: 16, fontWeight: FontWeight.w600),
-                  ),
+                  Text(text),
                   if (trailingIcon != null) ...[
                     const SizedBox(width: 4),
-                    Icon(trailingIcon, size: 24, color: Theme.of(context).colorScheme.primary),
+                    Icon(trailingIcon, size: 24),
                   ],
                 ],
               ),

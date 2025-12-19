@@ -21,24 +21,38 @@ final ThemeData appThemeLight = ThemeData(
   scaffoldBackgroundColor: bg_main,
 
   // elevated button theme
-    elevatedButtonTheme: ElevatedButtonThemeData(
+  elevatedButtonTheme: ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
       backgroundColor: bgSplash_buttons_headers_floatingActionBtn,
       foregroundColor: getStarted_login_signup_bottomTabs_cards,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(30),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
       elevation: 0,
       minimumSize: const Size(double.infinity, 55),
-      textStyle: const TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.bold,
-      ),
-      disabledBackgroundColor: bgSplash_buttons_headers_floatingActionBtn.withAlpha((0.6 * 255).toInt()),
-      disabledForegroundColor: getStarted_login_signup_bottomTabs_cards.withAlpha((0.7 * 255).toInt()),
+      textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      disabledBackgroundColor: bgSplash_buttons_headers_floatingActionBtn
+          .withAlpha((0.6 * 255).toInt()),
+      disabledForegroundColor: getStarted_login_signup_bottomTabs_cards
+          .withAlpha((0.7 * 255).toInt()),
     ),
   ),
 
+  outlinedButtonTheme: OutlinedButtonThemeData(
+    style: OutlinedButton.styleFrom(
+      foregroundColor: bgSplash_buttons_headers_floatingActionBtn,
+      side: const BorderSide(
+        color: bgSplash_buttons_headers_floatingActionBtn,
+        width: 2,
+      ),
+      textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+      minimumSize: const Size.fromHeight(55),
+      overlayColor: bgSplash_buttons_headers_floatingActionBtn.withAlpha(
+        (0.08 * 255).round(),
+      ),
+      disabledForegroundColor: bgSplash_buttons_headers_floatingActionBtn
+          .withAlpha((0.6 * 255).round()),
+    ),
+  ),
 );
 
 
