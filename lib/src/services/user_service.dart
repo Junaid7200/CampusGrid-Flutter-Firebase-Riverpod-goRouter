@@ -29,26 +29,39 @@ Future<Map<String, dynamic>?> getCurrentUserProfile() async {
   return getUserProfile(userId);
 }
 
-Future<void> updateUserProfile({String? displayName, String? email}) async {
+Future<void> updateUserProfile({String? displayName}) async {
   final user = _auth.currentUser;
   if (user == null) throw Exception('No user logged in');
 
   // Update Firebase Auth profile
   if (displayName != null) {
     await user.updateDisplayName(displayName);
-  }
-  if (email != null) {
-    await user.updateEmail(email);
-  }
 
-  // Update Firestore document
-  final updates = <String, dynamic>{};
-  if (displayName != null) updates['displayName'] = displayName;
-  if (email != null) updates['email'] = email;
-
-  if (updates.isNotEmpty) {
-    await _firestore.collection('users').doc(user.uid).update(updates);
+    // Update Firestore document
+    await _firestore.collection('users').doc(user.uid).update({
+      'displayName': displayName,
+    });
   }
+}
+
+Future<void> updateUserEmail(String newEmail, String currentPassword) async {
+  final user = _auth.currentUser;
+  if (user == null) throw Exception('No user logged in');
+
+  // Re-authenticate user first
+  final credential = EmailAuthProvider.credential(
+    email: user.email!,
+    password: currentPassword,
+  );
+  await user.reauthenticateWithCredential(credential);
+
+  // Now update email
+  await user.verifyBeforeUpdateEmail(newEmail);
+
+  // Update Firestore after verification
+  await _firestore.collection('users').doc(user.uid).update({
+    'email': newEmail,
+  });
 }
 
 Future<int> getUserNotesCount(String userId) async {
@@ -64,9 +77,9 @@ Future<int> getUserLikesReceived(String userId) async {
       .collection('notes')
       .where('uploadedBy', isEqualTo: userId)
       .get();
-      int totalLikes = 0;
-      for (var doc in snapshot.docs) {
-        totalLikes += (doc.data()['likesCount'] as int?) ?? 0;
-      }
+  int totalLikes = 0;
+  for (var doc in snapshot.docs) {
+    totalLikes += (doc.data()['likesCount'] as int?) ?? 0;
+  }
   return totalLikes;
 }
