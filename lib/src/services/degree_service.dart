@@ -7,13 +7,21 @@ Future<List<Map<String, dynamic>>> getDegreesByDepartment(String depId) async {
       .collection('degree')
       .where('deptId', isEqualTo: depId)
       .get();
-  return snapshot.docs.map((doc) => doc.data()).toList();
+  return snapshot.docs.map((doc) {
+    return {
+      'id': doc.id,
+      ...doc.data(),
+    };
+  }).toList();
 }
 
 Future<Map<String, dynamic>> getDegreeById(String degId) async {
   final doc = await _firestore.collection('degree').doc(degId).get();
   if (doc.exists) {
-    return doc.data()!;
+    return {
+      'id': doc.id,
+      ...doc.data()!,
+    };
   } else {
     throw Exception('Degree not found.');
   }
