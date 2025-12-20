@@ -3,6 +3,7 @@ import 'package:campus_grid/src/shared/widgets/home_header.dart';
 import 'package:campus_grid/src/shared/widgets/verstile_card.dart';
 import 'package:campus_grid/src/services/user_service.dart' as user_service;
 import 'package:campus_grid/src/services/note_service.dart' as note_service;
+import 'package:go_router/go_router.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -122,8 +123,7 @@ class _HomePageState extends State<HomePage> {
                             likesCount: note['likesCount'] ?? 0,
                             authorName: note['uploaderName'] ?? 'Unknown',
                             onTap: () {
-                              // TODO: Navigate to note details
-                              print('Tapped on note: ${note['id']}');
+                              context.push('/view_resource/${note['id']}');
                             },
                           ),
                         );
@@ -159,8 +159,7 @@ class _HomePageState extends State<HomePage> {
                         likesCount: note['likesCount'] ?? 0,
                         authorName: note['uploaderName'] ?? 'Unknown',
                         onTap: () {
-                          // TODO: Navigate to note details
-                          print('Tapped on note: ${note['id']}');
+                          context.push('/view_resource/${note['id']}');
                         },
                       );
                     },
