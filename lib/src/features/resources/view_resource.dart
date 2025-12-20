@@ -99,7 +99,9 @@ class _ViewResourcePageState extends State<ViewResourcePage> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
-                            color: colors.onSurface.withAlpha((0.7 * 255).toInt()),
+                            color: colors.onSurface.withAlpha(
+                              (0.7 * 255).toInt(),
+                            ),
                           ),
                         ),
                         Text(
@@ -107,8 +109,35 @@ class _ViewResourcePageState extends State<ViewResourcePage> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
-                            color: colors.onSurface.withAlpha((0.7 * 255).toInt()),
+                            color: colors.onSurface.withAlpha(
+                              (0.7 * 255).toInt(),
+                            ),
                           ),
+                        ),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.favorite,
+                              size: 18,
+                              color: Color(0xFFEF5350),
+                            ),
+                            SizedBox(width: 4),
+                            Text(
+                              '${note['likesCount'] ?? 0} likes',
+                              style: TextStyle(fontSize: 14),
+                            ),
+                            SizedBox(width: 16),
+                            Icon(
+                              Icons.insert_drive_file,
+                              size: 18,
+                              color: colors.primary,
+                            ),
+                            SizedBox(width: 4),
+                            Text(
+                              note['fileType']?.toUpperCase() ?? 'FILE',
+                              style: TextStyle(fontSize: 14),
+                            ),
+                          ],
                         ),
                         SizedBox(height: 16),
                         CustomButton(
