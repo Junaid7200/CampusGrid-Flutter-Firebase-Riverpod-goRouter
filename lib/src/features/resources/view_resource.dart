@@ -94,12 +94,20 @@ class _ViewResourcePageState extends State<ViewResourcePage> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(height: 8),
+                        Text(
+                          '${note['description'] ?? 'Unknown'}',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: colors.onSurface.withAlpha((0.7 * 255).toInt()),
+                          ),
+                        ),
                         Text(
                           'By: ${note['uploaderName'] ?? 'Unknown'}',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
+                            color: colors.onSurface.withAlpha((0.7 * 255).toInt()),
                           ),
                         ),
                         SizedBox(height: 16),
@@ -114,6 +122,7 @@ class _ViewResourcePageState extends State<ViewResourcePage> {
                           text: "Save to Library",
                           onPressed: () {},
                         ),
+                        SizedBox(height: 16),
                       ],
                     ),
                   ),

@@ -113,7 +113,6 @@ class _HomePageState extends State<HomePage> {
                         final note = _mostLikedNotes[index];
                         final currentUserId = user_service.getCurrentUserId();
                         final isMyNote = note['uploadedBy'] == currentUserId;
-
                         return SizedBox(
                           width: 320,
                           child: VerstileCard(
