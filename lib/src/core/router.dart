@@ -1,6 +1,5 @@
 // import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-
 import "../features/startup/splash.dart";
 import "../features/startup/get_started.dart";
 import "../features/auth/login.dart";
@@ -15,15 +14,20 @@ import "../features/resources/new_resource.dart";
 import "../features/resources/view_resource.dart";
 import './layout/home_shell.dart';
 
-
 final GoRouter appRouter = GoRouter(
   initialLocation: "/",
   routes: [
     GoRoute(path: "/", builder: (context, state) => const SplashPage()),
-    GoRoute(path: "/get-started", builder: (context, state) => const GetStartedPage()),
+    GoRoute(
+      path: "/get-started",
+      builder: (context, state) => const GetStartedPage(),
+    ),
     GoRoute(path: "/login", builder: (context, state) => const LoginPage()),
     GoRoute(path: "/signup", builder: (context, state) => const SignupPage()),
-    GoRoute(path: "/forgot-password", builder: (context, state) => const ForgotPasswordPage()),
+    GoRoute(
+      path: "/forgot-password",
+      builder: (context, state) => const ForgotPasswordPage(),
+    ),
 
     // BOTTOM NAVIGATION SHELL ROUTES
     StatefulShellRoute.indexedStack(
@@ -33,61 +37,86 @@ final GoRouter appRouter = GoRouter(
       branches: [
         StatefulShellBranch(
           routes: [
-            GoRoute(path: "/home", builder: (context, state) => const HomePage()),
+            GoRoute(
+              path: "/home",
+              builder: (context, state) => const HomePage(),
+            ),
           ],
         ),
         StatefulShellBranch(
           routes: [
-            GoRoute(path: "/search", builder: (context, state) => SearchPage(
-              query: state.uri.queryParameters["query"],
-              type: state.uri.queryParameters["type"]
-            )),
+            GoRoute(
+              path: "/search",
+              builder: (context, state) => SearchPage(
+                query: state.uri.queryParameters["query"],
+                type: state.uri.queryParameters["type"],
+              ),
+            ),
           ],
         ),
         StatefulShellBranch(
           routes: [
-            GoRoute(path: "/library", builder: (context, state) => LibraryPage(
-              query: state.uri.queryParameters["query"],
-              sort: state.uri.queryParameters["sort"],
-            )),
+            GoRoute(
+              path: "/library",
+              builder: (context, state) => LibraryPage(
+                query: state.uri.queryParameters["query"],
+                sort: state.uri.queryParameters["sort"],
+              ),
+            ),
           ],
         ),
         StatefulShellBranch(
           routes: [
-            GoRoute(path: "/profile", builder: (context, state) => const ProfilePage()),
+            GoRoute(
+              path: "/profile",
+              builder: (context, state) => const ProfilePage(),
+            ),
           ],
         ),
-      ]
+      ],
     ),
     // ganna need parameterized routes now
     //degrees of a department:
-    GoRoute(path: "/search/dpt/:dptId/degree", builder: (context, state) => 
-      ListDegSubNotesPage(
-        dptId: state.pathParameters["dptId"]!,
-      ),
+    GoRoute(
+      path: "/search/dpt/:dptId/degree",
+      builder: (context, state) =>
+          ListDegSubNotesPage(dptId: state.pathParameters["dptId"]!),
     ),
     // subjects of a degree
-    GoRoute(path: "/search/dpt/:dptId/degree/:degId/subject", builder: (context, state) =>
-      ListDegSubNotesPage(
+    GoRoute(
+      path: "/search/dpt/:dptId/degree/:degId/subject",
+      builder: (context, state) => ListDegSubNotesPage(
         dptId: state.pathParameters["dptId"]!,
         degId: state.pathParameters["degId"]!,
       ),
     ),
     // notes of a subject
-    GoRoute(path: "/search/dpt/:dptId/degree/:degId/subject/:subId/notes", builder: (context, state) =>
-      ListDegSubNotesPage(
+    GoRoute(
+      path: "/search/dpt/:dptId/degree/:degId/subject/:subId/notes",
+      builder: (context, state) => ListDegSubNotesPage(
         dptId: state.pathParameters["dptId"]!,
         degId: state.pathParameters["degId"]!,
         subId: state.pathParameters["subId"]!,
       ),
     ),
     // view a resource
-    GoRoute(path: "/view_resource/:resourceId", builder: (context, state) => 
-      ViewResourcePage(resourceId: state.pathParameters["resourceId"]!)
+    GoRoute(
+      path: "/view_resource/:resourceId",
+      builder: (context, state) =>
+          ViewResourcePage(resourceId: state.pathParameters["resourceId"]!),
     ),
     // add a resource
-    GoRoute(path: "/new_resource", builder: (context, state) => const NewResourcePage()),
-  ]
+    GoRoute(
+      path: "/new_resource",
+      builder: (context, state) => const NewResourcePage(),
+    ),
+    // view all notes from home (NEW)
+    GoRoute(
+      path: "/all_notes",
+      builder: (context, state) =>
+          ListDegSubNotesPage(filterType: state.uri.queryParameters["filter"]),
+    ),
+  ],
 );
 
 

@@ -96,7 +96,8 @@ class _HomePageState extends State<HomePage> {
             HomeHeader(
               heading: "Most Liked Notes",
               onActionPressed: () {
-                // TODO: Navigate to all popular notes
+                // TODO: Navigate to all notes in descending order of likes
+                context.push('/all_notes?filter=most_liked');
               },
             ),
 
@@ -137,6 +138,7 @@ class _HomePageState extends State<HomePage> {
               heading: "Recently Added Notes",
               onActionPressed: () {
                 // TODO: Navigate to all recent notes
+                context.push('/all_notes?filter=recent');
               },
             ),
             // Vertical ListView for Recently Added Notes
