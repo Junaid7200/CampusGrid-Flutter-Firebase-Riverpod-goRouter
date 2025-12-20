@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:campus_grid/src/shared/widgets/auth_img.dart';
 import 'package:campus_grid/src/shared/widgets/text_field.dart';
@@ -6,9 +5,7 @@ import 'package:campus_grid/src/shared/widgets/button.dart';
 import 'package:campus_grid/src/shared/widgets/outlined_button.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:campus_grid/src/services/firebase_auth.dart' as auth_service;
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -24,13 +21,9 @@ class _SignupPageState extends State<SignupPage> {
   final TextEditingController _email_controller = TextEditingController();
   final TextEditingController _password_controller = TextEditingController();
 
-  bool _isGoogleSignInInitialized = false;
-  StreamSubscription<GoogleSignInAuthenticationEvent>? _authEventSubscription;
-
   @override
   void initState() {
     super.initState();
-    _initializeGoogleSignIn();
   }
 
   @override
@@ -38,49 +31,22 @@ class _SignupPageState extends State<SignupPage> {
     _name_controller.dispose();
     _email_controller.dispose();
     _password_controller.dispose();
-    _authEventSubscription?.cancel();
     super.dispose();
   }
 
-  Future<void> _initializeGoogleSignIn() async {
-    try {
-      await GoogleSignIn.instance.initialize();
-      _isGoogleSignInInitialized = true;
-    } catch (e) {
-      print('Google Sign-In initialization error: $e');
-    }
-  }
-
-  void _handleSignup() async {
+  Future<void> _handleSignup() async {
     if (_formKey.currentState!.validate()) {
-      print('Name: ${_name_controller.text}');
-      print('Email: ${_email_controller.text}');
-      print('Password: ${_password_controller.text}');
       setState(() {
         _isLoading = true;
       });
+
       try {
-        final userCredential = await FirebaseAuth.instance
-            .createUserWithEmailAndPassword(
-              email: _email_controller.text,
-              password: _password_controller.text,
-            );
-        final user = userCredential.user;
-        // await user?.sendEmailVerification();
-        if (user != null) {
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(user.uid)
-              .set({
-                'displayName': _name_controller.text.trim(),
-                'email': _email_controller.text.trim(),
-                'createdAt': FieldValue.serverTimestamp(),
-                'notesCount': 0,
-                'likesReceived': 0,
-                'savedNotes': 0,
-              });
-        }
-        print('User registered: ${userCredential}');
+        await auth_service.signupWithEmail(
+          _email_controller.text,
+          _password_controller.text,
+          _name_controller.text,
+        );
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -91,18 +57,12 @@ class _SignupPageState extends State<SignupPage> {
           );
           context.go('/home');
         }
-      } on FirebaseAuthException catch (e) {
-        String message = "Signup failed";
-        if (e.code == 'weak-password') {
-          message = 'The password provided is too weak.';
-        } else if (e.code == 'email-already-in-use') {
-          message = 'The account already exists for that email.';
-        }
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(message)));
       } catch (e) {
-        print(e);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+          );
+        }
       } finally {
         if (mounted) {
           setState(() {
@@ -119,69 +79,7 @@ class _SignupPageState extends State<SignupPage> {
     });
 
     try {
-      // Ensure Google Sign-In is initialized
-      if (!_isGoogleSignInInitialized) {
-        await _initializeGoogleSignIn();
-      }
-
-      // Create a Completer to handle the event-driven API
-      final Completer<GoogleSignInAccount?> completer =
-          Completer<GoogleSignInAccount?>();
-
-      // Listen to authentication events
-      _authEventSubscription?.cancel();
-      _authEventSubscription = GoogleSignIn.instance.authenticationEvents
-          .listen((event) {
-            if (event is GoogleSignInAuthenticationEventSignIn) {
-              if (!completer.isCompleted) {
-                completer.complete(event.user);
-              }
-            }
-          });
-
-      // Trigger the authentication
-      await GoogleSignIn.instance.authenticate();
-
-      // Wait for the user from the event stream
-      final GoogleSignInAccount? googleUser = await completer.future.timeout(
-        Duration(seconds: 30),
-        onTimeout: () => null,
-      );
-
-      // Cancel the subscription
-      _authEventSubscription?.cancel();
-
-      if (googleUser == null) {
-        // User canceled the sign-in
-        setState(() {
-          _isGoogleLoading = false;
-        });
-        return;
-      }
-
-      // Get the authentication tokens (synchronous in v7)
-      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
-
-      // Create a new credential for Firebase (only idToken is required)
-      final credential = GoogleAuthProvider.credential(
-        idToken: googleAuth.idToken,
-      );
-
-      final userCredential = await FirebaseAuth.instance.signInWithCredential(
-        credential,
-      );
-      final user = userCredential.user;
-      if (user != null) {
-        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-          'displayName': user.displayName ?? 'No Name',
-          'email': user.email,
-          'createdAt': FieldValue.serverTimestamp(),
-            'notesCount': 0,
-            'likesReceived': 0,
-            'savedNotes': 0,
-        }, SetOptions(merge: true));
-      }
-      print('Google sign-in successful');
+      await auth_service.signInWithGoogle();
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -189,39 +87,10 @@ class _SignupPageState extends State<SignupPage> {
         );
         context.go('/home');
       }
-    } on GoogleSignInException catch (e) {
-      // Handle Google Sign-In specific exceptions
-      String message = "Google sign-in failed";
-      if (e.code == GoogleSignInExceptionCode.canceled) {
-        message = 'Sign-in was canceled';
-      } else if (e.code == GoogleSignInExceptionCode.clientConfigurationError) {
-        message = 'Configuration error. Please contact support.';
-      }
-
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(message)));
-      }
-      print('Google sign-in exception: ${e.code} - ${e.description}');
-    } on FirebaseAuthException catch (e) {
-      String message = "Firebase authentication failed";
-      if (e.code == 'account-exists-with-different-credential') {
-        message = 'An account already exists with the same email address.';
-      } else if (e.code == 'invalid-credential') {
-        message = 'Invalid credential. Please try again.';
-      }
-
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(message)));
-      }
     } catch (e) {
-      print('Error during Google sign-in: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('An error occurred. Please try again.')),
+          SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
         );
       }
     } finally {

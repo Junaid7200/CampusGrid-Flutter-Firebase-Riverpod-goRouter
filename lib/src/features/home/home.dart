@@ -214,7 +214,6 @@ class _HomePageState extends State<HomePage> {
                 // TODO: Navigate to all recent notes
               },
             ),
-
             // Vertical ListView for Recently Added Notes
             ListView.builder(
               shrinkWrap: true,
