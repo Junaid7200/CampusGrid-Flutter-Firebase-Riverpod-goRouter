@@ -5,7 +5,7 @@ final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 Future<List<Map<String, dynamic>>> getDegreesByDepartment(String depId) async {
   final snapshot = await _firestore
       .collection('degree')
-      .where('departmentId', isEqualTo: depId)
+      .where('deptId', isEqualTo: depId)
       .get();
   return snapshot.docs.map((doc) => doc.data()).toList();
 }

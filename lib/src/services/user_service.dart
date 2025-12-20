@@ -66,7 +66,7 @@ Future<void> updateUserEmail(String newEmail, String currentPassword) async {
 
 Future<int> getUserNotesCount(String userId) async {
   final snapshot = await _firestore
-      .collection('notes')
+      .collection('note')
       .where('ownerId', isEqualTo: userId)
       .get();
   return snapshot.docs.length;
@@ -74,7 +74,7 @@ Future<int> getUserNotesCount(String userId) async {
 
 Future<int> getUserLikesReceived(String userId) async {
   final snapshot = await _firestore
-      .collection('notes')
+      .collection('note')
       .where('uploadedBy', isEqualTo: userId)
       .get();
   int totalLikes = 0;
