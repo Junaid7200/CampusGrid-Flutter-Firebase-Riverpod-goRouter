@@ -11,6 +11,7 @@ class VerstileCard extends StatelessWidget {
   // final IconData? icon;
   final int? likesCount;
   final int? resourcesCount;
+  final String? authorName;
 
   const VerstileCard({
     super.key,
@@ -21,6 +22,7 @@ class VerstileCard extends StatelessWidget {
     // this.icon,
     this.likesCount,
     this.resourcesCount,
+    this.authorName,
   });
   @override
   Widget build(BuildContext context) {
@@ -76,6 +78,17 @@ class VerstileCard extends StatelessWidget {
                         color: colors.onSurface.withAlpha((0.7 * 255).toInt()),
                       ),
                     ),
+                    const SizedBox(height: 4),
+                    if (authorName != null) ...[
+                      Text(
+                        "By $authorName",
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: colors.onSurface.withAlpha((0.6 * 255).toInt()),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                    ],
                     const SizedBox(height: 4),
                     if (cardType == "note" || cardType == "myNote") ...[
                       Row(

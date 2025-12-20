@@ -5,6 +5,7 @@ import "../features/startup/splash.dart";
 import "../features/startup/get_started.dart";
 import "../features/auth/login.dart";
 import "../features/auth/signup.dart";
+import "../features/auth/forgot_password.dart";
 import "../features/home/home.dart";
 import "../features/search/search.dart";
 import "../features/library/library.dart";
@@ -22,6 +23,7 @@ final GoRouter appRouter = GoRouter(
     GoRoute(path: "/get-started", builder: (context, state) => const GetStartedPage()),
     GoRoute(path: "/login", builder: (context, state) => const LoginPage()),
     GoRoute(path: "/signup", builder: (context, state) => const SignupPage()),
+    GoRoute(path: "/forgot-password", builder: (context, state) => const ForgotPasswordPage()),
 
     // BOTTOM NAVIGATION SHELL ROUTES
     StatefulShellRoute.indexedStack(

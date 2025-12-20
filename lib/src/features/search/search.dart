@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:campus_grid/src/shared/widgets/search_bar.dart';
 import 'package:campus_grid/src/shared/widgets/search_dpt_card.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:campus_grid/src/services/department_service.dart'
+    as department_service;
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key, this.query, this.type});
@@ -17,8 +18,8 @@ class _SearchPageState extends State<SearchPage> {
   bool _showDegrees = true;
   bool _showSubjects = true;
   bool _showNotes = true;
-  
-  List<Map<String, dynamic>> departments = [];
+
+  List<Map<String, dynamic>> depts = [];
   bool isLoading = true;
 
   @override
@@ -28,14 +29,15 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   Future<void> _fetchDepartments() async {
-    final snapshot = await FirebaseFirestore.instance.collection('department').get();
     setState(() {
-      departments = snapshot.docs.map((doc) {
-        return {
-          'id': doc.id,
-          ...doc.data(),
-        };
-      }).toList();
+      isLoading = true;
+    });
+    try {
+      depts = await department_service.getDepartments();
+    } catch (e) {
+      print('Error fetching departments: $e');
+    }
+    setState(() {
       isLoading = false;
     });
   }
@@ -117,7 +119,9 @@ class _SearchPageState extends State<SearchPage> {
                     Expanded(
                       child: CustomSearchBar(
                         hintText: 'Search degrees, subjects, and notes',
-                        controller: TextEditingController(text: widget.query ?? ''),
+                        controller: TextEditingController(
+                          text: widget.query ?? '',
+                        ),
                         onTap: () {},
                         onChanged: (value) {},
                         onSubmit: (value) {},
@@ -144,7 +148,7 @@ class _SearchPageState extends State<SearchPage> {
                   ],
                 ),
                 SizedBox(height: 24),
-                
+
                 isLoading
                     ? Center(child: CircularProgressIndicator())
                     : GridView.builder(
@@ -156,9 +160,9 @@ class _SearchPageState extends State<SearchPage> {
                           mainAxisSpacing: 16,
                           childAspectRatio: 1,
                         ),
-                        itemCount: departments.length,
+                        itemCount: depts.length,
                         itemBuilder: (context, index) {
-                          final dept = departments[index];
+                          final dept = depts[index];
                           return DptCard(
                             title: dept['id'] ?? '',
                             subtitlle: dept['name'] ?? 'Unknown',

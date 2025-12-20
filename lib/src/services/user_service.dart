@@ -67,7 +67,7 @@ Future<void> updateUserEmail(String newEmail, String currentPassword) async {
 Future<int> getUserNotesCount(String userId) async {
   final snapshot = await _firestore
       .collection('note')
-      .where('ownerId', isEqualTo: userId)
+      .where('uploadedBy', isEqualTo: userId)
       .get();
   return snapshot.docs.length;
 }
@@ -82,4 +82,9 @@ Future<int> getUserLikesReceived(String userId) async {
     totalLikes += (doc.data()['likesCount'] as int?) ?? 0;
   }
   return totalLikes;
+}
+
+String? getCurrentUserId() {
+  final user = _auth.currentUser;
+  return user?.uid;
 }
