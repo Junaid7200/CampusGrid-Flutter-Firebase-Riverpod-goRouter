@@ -127,6 +127,8 @@ class _ViewResourcePageState extends State<ViewResourcePage> {
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+
           child: Column(
             children: [
               Row(

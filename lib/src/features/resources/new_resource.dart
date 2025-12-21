@@ -1,14 +1,513 @@
 import "package:flutter/material.dart";
+import "package:campus_grid/src/shared/widgets/text_field.dart";
+import "package:campus_grid/src/shared/widgets/button.dart";
+import 'package:campus_grid/src/services/department_service.dart'
+    as dept_service;
+import 'package:campus_grid/src/services/degree_service.dart' as deg_service;
+import 'package:campus_grid/src/services/subject_service.dart' as sub_service;
+import 'package:campus_grid/src/services/note_service.dart' as note_service;
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:go_router/go_router.dart';
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 
-
-class NewResourcePage extends StatelessWidget {
+class NewResourcePage extends StatefulWidget {
   const NewResourcePage({super.key});
+  State<NewResourcePage> createState() => _NewResourcePageState();
+}
+
+class _NewResourcePageState extends State<NewResourcePage> {
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  List<Map<String, dynamic>> _departments = [];
+  List<Map<String, dynamic>> _degrees = [];
+  List<Map<String, dynamic>> _subjects = [];
+
+  String? _selectedDeptId;
+  String? _selectedDegId;
+  String? _selectedSubId;
+
+  File? _selectedFile;
+  String? _fileName;
+
+  bool _isLoadingDepts = true;
+  bool _isLoadingDegs = false;
+  bool _isLoadingSubs = false;
+  bool _isUploading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDepartments();
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadDepartments() async {
+    setState(() => _isLoadingDepts = true);
+    try {
+      final depts = await dept_service.getDepartments();
+      print('Loaded ${depts.length} departments'); // DEBUG
+      setState(() {
+        _departments = depts;
+        _isLoadingDepts = false;
+      });
+    } catch (e) {
+      print('Error loading departments: $e'); // DEBUG
+      setState(() => _isLoadingDepts = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading departments: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _loadDegrees(String deptId) async {
+    print('Loading degrees for department: $deptId'); // DEBUG
+    setState(() {
+      _isLoadingDegs = true;
+      _selectedDegId = null;
+      _selectedSubId = null;
+      _degrees = [];
+      _subjects = [];
+    });
+
+    try {
+      final degrees = await deg_service.getDegreesByDepartment(deptId);
+      print('Loaded ${degrees.length} degrees'); // DEBUG
+      if (degrees.isNotEmpty) {
+        print('First degree: ${degrees[0]}'); // DEBUG
+      }
+
+      setState(() {
+        _degrees = degrees;
+        _isLoadingDegs = false;
+      });
+
+      if (degrees.isEmpty && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('No degrees found for this department')),
+        );
+      }
+    } catch (e) {
+      print('Error loading degrees: $e'); // DEBUG
+      setState(() => _isLoadingDegs = false);
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error loading degrees: $e')));
+      }
+    }
+  }
+
+  Future<void> _loadSubjects(String degId) async {
+    print('Loading subjects for degree: $degId'); // DEBUG
+    setState(() {
+      _isLoadingSubs = true;
+      _selectedSubId = null;
+      _subjects = [];
+    });
+
+    try {
+      final subjects = await sub_service.getSubjectsByDegree(degId);
+      print('Loaded ${subjects.length} subjects'); // DEBUG
+
+      setState(() {
+        _subjects = subjects;
+        _isLoadingSubs = false;
+      });
+
+      if (subjects.isEmpty && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('No subjects found for this degree')),
+        );
+      }
+    } catch (e) {
+      print('Error loading subjects: $e'); // DEBUG
+      setState(() => _isLoadingSubs = false);
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error loading subjects: $e')));
+      }
+    }
+  }
+
+  Future<void> _pickFile() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: [
+          'pdf',
+          'png',
+          'jpg',
+          'jpeg',
+          'pptx',
+          'ppt',
+          'docx',
+          'doc',
+        ],
+        allowMultiple: false,
+      );
+
+      if (result != null && result.files.single.path != null) {
+        final file = File(result.files.single.path!);
+        final fileSizeInBytes = await file.length();
+        final fileSizeInMB = fileSizeInBytes / (1024 * 1024);
+
+        // Check file size (10MB limit)
+        if (fileSizeInMB > 10) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('File size must be less than 10MB'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+          return;
+        }
+
+        setState(() {
+          _selectedFile = file;
+          _fileName = result.files.single.name;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error picking file: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _uploadResource() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    if (_selectedSubId == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Please select a subject')));
+      return;
+    }
+
+    if (_selectedFile == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Please select a file to upload')));
+      return;
+    }
+
+    setState(() => _isUploading = true);
+
+    try {
+      // 1. Upload file to Firebase Storage
+      final fileName = '${DateTime.now().millisecondsSinceEpoch}_$_fileName';
+      final storageRef = FirebaseStorage.instance.ref().child(
+        'notes/$fileName',
+      );
+      final uploadTask = await storageRef.putFile(_selectedFile!);
+      final fileUrl = await uploadTask.ref.getDownloadURL();
+
+      // 2. Determine file type
+      final fileExtension = _fileName!.split('.').last.toLowerCase();
+      String fileType = 'document';
+      if (fileExtension == 'pdf') {
+        fileType = 'pdf';
+      } else if (['png', 'jpg', 'jpeg'].contains(fileExtension)) {
+        fileType = 'image';
+      }
+
+      // 3. Create note in Firestore
+      await note_service.createNote(
+        title: _titleController.text.trim(),
+        description: _descController.text.trim(),
+        fileUrl: fileUrl,
+        fileName: _fileName!,
+        fileType: fileType,
+        subId: _selectedSubId!,
+      );
+
+      setState(() => _isUploading = false);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Resource uploaded successfully!')),
+        );
+        context.go('/profile'); // Navigate to profile to see uploaded note
+      }
+    } catch (e) {
+      setState(() => _isUploading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Upload failed: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
     return Scaffold(
-      body: const Center(
-        child: Text("New Resource Page Content Here"),
+      appBar: AppBar(
+        title: Text('Upload Resource', style: TextStyle(color: colors.primary)),
+        leading: IconButton(
+          icon: Icon(Icons.chevron_left, size: 32, color: colors.primary),
+          onPressed: () => context.pop(),
+        ),
+      ),
+      body: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Title Field
+                CustomTextField(
+                  labelText: "Resource Title",
+                  hintText: "e.g., OOP Final Exam Notes",
+                  controller: _titleController,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter a title';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                // Description Field
+                CustomTextField(
+                  labelText: "Description",
+                  hintText: "Briefly describe your resource",
+                  controller: _descController,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter a description';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                // Department Dropdown
+                Text(
+                  "Department",
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+                const SizedBox(height: 8),
+                _isLoadingDepts
+                    ? Container(
+                        height: 56,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: colors.outline),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: CircularProgressIndicator(),
+                      )
+                    : DropdownButtonFormField<String>(
+                        decoration: InputDecoration(
+                          hintText: 'Select department',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        initialValue: _selectedDeptId,
+                        items: _departments.map((dept) {
+                          return DropdownMenuItem<String>(
+                            value: dept['id'],
+                            child: Text(dept['name'] ?? 'Unknown'),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          print('Selected department: $value'); // DEBUG
+                          setState(() => _selectedDeptId = value);
+                          if (value != null) _loadDegrees(value);
+                        },
+                        validator: (value) {
+                          if (value == null)
+                            return 'Please select a department';
+                          return null;
+                        },
+                      ),
+                const SizedBox(height: 16),
+
+                // Degree Dropdown
+                Text("Degree", style: Theme.of(context).textTheme.bodyLarge),
+                const SizedBox(height: 8),
+                _isLoadingDegs
+                    ? Container(
+                        height: 56,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: colors.outline),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: CircularProgressIndicator(),
+                      )
+                    : DropdownButtonFormField<String>(
+                        decoration: InputDecoration(
+                          hintText: _selectedDeptId == null
+                              ? 'Select department first'
+                              : _degrees.isEmpty
+                              ? 'No degrees available'
+                              : 'Select degree',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        initialValue: _selectedDegId,
+                        items: _degrees.map((deg) {
+                          return DropdownMenuItem<String>(
+                            value: deg['id'],
+                            child: Text(deg['name'] ?? 'Unknown'),
+                          );
+                        }).toList(),
+                        onChanged: _selectedDeptId == null || _degrees.isEmpty
+                            ? null
+                            : (value) {
+                                print('Selected degree: $value'); // DEBUG
+                                setState(() => _selectedDegId = value);
+                                if (value != null) _loadSubjects(value);
+                              },
+                        validator: (value) {
+                          if (value == null) return 'Please select a degree';
+                          return null;
+                        },
+                      ),
+                const SizedBox(height: 16),
+
+                // Subject Dropdown
+                Text("Subject", style: Theme.of(context).textTheme.bodyLarge),
+                const SizedBox(height: 8),
+                _isLoadingSubs
+                    ? Container(
+                        height: 56,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: colors.outline),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: CircularProgressIndicator(),
+                      )
+                    : DropdownButtonFormField<String>(
+                        decoration: InputDecoration(
+                          hintText: _selectedDegId == null
+                              ? 'Select degree first'
+                              : _subjects.isEmpty
+                              ? 'No subjects available'
+                              : 'Select subject',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        initialValue: _selectedSubId,
+                        items: _subjects.map((sub) {
+                          return DropdownMenuItem<String>(
+                            value: sub['id'],
+                            child: Text(sub['name'] ?? 'Unknown'),
+                          );
+                        }).toList(),
+                        onChanged: _selectedDegId == null || _subjects.isEmpty
+                            ? null
+                            : (value) {
+                                print('Selected subject: $value'); // DEBUG
+                                setState(() => _selectedSubId = value);
+                              },
+                        validator: (value) {
+                          if (value == null) return 'Please select a subject';
+                          return null;
+                        },
+                      ),
+                const SizedBox(height: 24),
+
+                // File Upload Section
+                Text(
+                  "Upload File",
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+                const SizedBox(height: 8),
+                GestureDetector(
+                  onTap: _pickFile,
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(40),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: colors.outline.withOpacity(0.5),
+                        width: 2,
+                        style: BorderStyle.solid,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                      color: colors.surfaceContainerHighest.withOpacity(0.3),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.upload_file,
+                          size: 48,
+                          color: colors.primary,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          _fileName ?? 'Click to Upload File',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: _fileName != null
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                            color: _fileName != null
+                                ? colors.primary
+                                : colors.onSurface,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'PDF, PNG, JPG (Max 10MB)',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: colors.onSurface.withOpacity(0.6),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 32),
+
+                // Submit Button
+                CustomButton(
+                  text: 'Submit Resource',
+                  onPressed: _uploadResource,
+                  isLoading: _isUploading,
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
