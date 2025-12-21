@@ -6,6 +6,7 @@ class CustomOutlinedButton extends StatelessWidget {
   final IconData? leadingIcon;
   final IconData? trailingIcon;
   final bool isLoading;
+  final Color? buttonColor;
 
   const CustomOutlinedButton({
     super.key,
@@ -14,6 +15,7 @@ class CustomOutlinedButton extends StatelessWidget {
     this.leadingIcon,
     this.trailingIcon,
     this.isLoading = false,
+    this.buttonColor,
   });
 
   @override
@@ -22,6 +24,10 @@ class CustomOutlinedButton extends StatelessWidget {
       width: double.infinity,
       child: OutlinedButton(
         onPressed: isLoading ? null : onPressed,
+        style: OutlinedButton.styleFrom(
+          side: BorderSide(color: buttonColor ?? Theme.of(context).colorScheme.primary), 
+          foregroundColor: buttonColor ?? Theme.of(context).colorScheme.primary,
+        ),
         child: isLoading
             ? SizedBox(
                 height: 24,
@@ -29,7 +35,7 @@ class CustomOutlinedButton extends StatelessWidget {
                 child: CircularProgressIndicator(
                   strokeWidth: 2.5,
                   valueColor: AlwaysStoppedAnimation(
-                    Theme.of(context).colorScheme.primary,
+                    buttonColor ?? Theme.of(context).colorScheme.primary,
                   ),
                 ),
               )

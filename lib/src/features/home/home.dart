@@ -95,9 +95,10 @@ class _HomePageState extends State<HomePage> {
             // Most Liked Notes Section
             HomeHeader(
               heading: "Most Liked Notes",
-              onActionPressed: () {
+              onActionPressed: () async {
                 // TODO: Navigate to all notes in descending order of likes
-                context.push('/all_notes?filter=most_liked');
+                await context.push('/all_notes?filter=most_liked');
+                _loadNotes();
               },
             ),
 
@@ -122,8 +123,9 @@ class _HomePageState extends State<HomePage> {
                             cardType: isMyNote ? "myNote" : "note",
                             likesCount: note['likesCount'] ?? 0,
                             authorName: note['uploaderName'] ?? 'Unknown',
-                            onTap: () {
-                              context.push('/view_resource/${note['id']}');
+                            onTap: () async {
+                              await context.push('/view_resource/${note['id']}');
+                              _loadNotes();
                             },
                           ),
                         );
@@ -136,9 +138,10 @@ class _HomePageState extends State<HomePage> {
             // Recently Added Notes Section
             HomeHeader(
               heading: "Recently Added Notes",
-              onActionPressed: () {
+              onActionPressed: () async {
                 // TODO: Navigate to all recent notes
-                context.push('/all_notes?filter=recent');
+                await context.push('/all_notes?filter=recent');
+                _loadNotes();
               },
             ),
             // Vertical ListView for Recently Added Notes
@@ -159,8 +162,9 @@ class _HomePageState extends State<HomePage> {
                         cardType: isMyNote ? "myNote" : "note",
                         likesCount: note['likesCount'] ?? 0,
                         authorName: note['uploaderName'] ?? 'Unknown',
-                        onTap: () {
-                          context.push('/view_resource/${note['id']}');
+                        onTap: () async {
+                          await context.push('/view_resource/${note['id']}');
+                          _loadNotes();
                         },
                       );
                     },

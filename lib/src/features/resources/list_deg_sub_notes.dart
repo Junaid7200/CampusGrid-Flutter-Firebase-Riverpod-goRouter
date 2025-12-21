@@ -93,10 +93,11 @@ class _ListDegSubNotesPageState extends State<ListDegSubNotesPage> {
     return "degree";
   }
 
-  void _handleCardTap(item) {
+  void _handleCardTap(item) async {
     // Notes: navigate to view resource
     if (widget.filterType != null || widget.subId != null) {
-      context.push('/view_resource/${item['id']}');
+      await context.push('/view_resource/${item['id']}');
+      _loadData();
     }
     // Subjects: navigate to notes of subject
     else if (widget.degId != null) {

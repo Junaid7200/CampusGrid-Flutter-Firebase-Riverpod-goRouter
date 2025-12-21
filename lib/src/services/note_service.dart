@@ -230,6 +230,10 @@ Future<void> saveNote(String noteId) async {
     'noteId': noteId,
     'savedAt': FieldValue.serverTimestamp(),
   });
+  // increment savedCount in user document
+  await _firestore.collection('users').doc(user.uid).update({
+    'savedNotes': FieldValue.increment(1),
+  });
 }
 
 // Unsave a note
@@ -239,6 +243,10 @@ Future<void> unsaveNote(String noteId) async {
 
   final saveId = '${user.uid}_$noteId';
   await _firestore.collection('savedNotes').doc(saveId).delete();
+  // decrement savedCount in user document
+  await _firestore.collection('users').doc(user.uid).update({
+    'savedNotes': FieldValue.increment(-1),
+  });
 }
 
 // Check if user saved a note

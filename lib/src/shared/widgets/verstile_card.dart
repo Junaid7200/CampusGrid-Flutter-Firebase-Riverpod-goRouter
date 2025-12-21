@@ -38,10 +38,11 @@ class VerstileCard extends StatelessWidget {
       elevation: 1,
       margin: EdgeInsets.only(bottom: 16, left: 16, right: 16, top: 0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: SingleChildScrollView(
-        child: InkWell(
-          onTap: onTap,
-          child: Padding(
+      child: InkWell(
+        onTap: onTap,
+        child: SingleChildScrollView(
+          child: 
+          Padding(
             padding: const EdgeInsets.all(12.0),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -76,7 +77,9 @@ class VerstileCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 14,
-                          color: colors.onSurface.withAlpha((0.7 * 255).toInt()),
+                          color: colors.onSurface.withAlpha(
+                            (0.7 * 255).toInt(),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -85,7 +88,9 @@ class VerstileCard extends StatelessWidget {
                           "By $authorName",
                           style: TextStyle(
                             fontSize: 12,
-                            color: colors.onSurface.withAlpha((0.6 * 255).toInt()),
+                            color: colors.onSurface.withAlpha(
+                              (0.6 * 255).toInt(),
+                            ),
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -94,13 +99,19 @@ class VerstileCard extends StatelessWidget {
                       if (cardType == "note" || cardType == "myNote") ...[
                         Row(
                           children: [
-                            Icon(Icons.favorite, size: 16, color: Color(0xFFEF5350)),
+                            Icon(
+                              Icons.favorite,
+                              size: 16,
+                              color: Color(0xFFEF5350),
+                            ),
                             const SizedBox(width: 4),
                             Text(
-                              likesCount != null ? likesCount.toString() : "0",
+                              likesCount != null
+                                  ? likesCount.toString()
+                                  : "0",
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Color(0xFFEF5350)
+                                color: Color(0xFFEF5350),
                               ),
                             ),
                           ],
@@ -108,7 +119,11 @@ class VerstileCard extends StatelessWidget {
                       ] else if (cardType == "subject") ...[
                         Row(
                           children: [
-                            Icon(Icons.folder, size: 16, color: colors.primary),
+                            Icon(
+                              Icons.folder,
+                              size: 16,
+                              color: colors.primary,
+                            ),
                             const SizedBox(width: 4),
                             Text(
                               resourcesCount != null
@@ -116,7 +131,7 @@ class VerstileCard extends StatelessWidget {
                                   : "0",
                               style: TextStyle(
                                 fontSize: 12,
-                                color: colors.primary
+                                color: colors.primary,
                               ),
                             ),
                           ],
@@ -124,13 +139,17 @@ class VerstileCard extends StatelessWidget {
                       ] else if (cardType == "degree") ...[
                         Row(
                           children: [
-                            Icon(Icons.school, size: 16, color: colors.primary),
+                            Icon(
+                              Icons.school,
+                              size: 16,
+                              color: colors.primary,
+                            ),
                             const SizedBox(width: 4),
                             Text(
                               "Degree Program",
                               style: TextStyle(
                                 fontSize: 12,
-                                color: colors.primary
+                                color: colors.primary,
                               ),
                             ),
                           ],
@@ -148,15 +167,18 @@ class VerstileCard extends StatelessWidget {
                           // Handle edit action
                         },
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
                           decoration: BoxDecoration(
                             color: colors.secondary,
                             borderRadius: BorderRadius.circular(12),
                           ),
-                            child: Text(
-                              "Edit",
-                              style: TextStyle(color: colors.primary),
-                            ),
+                          child: Text(
+                            "Edit",
+                            style: TextStyle(color: colors.primary),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -165,15 +187,18 @@ class VerstileCard extends StatelessWidget {
                           // Handle delete action
                         },
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
                           decoration: BoxDecoration(
                             color: Color(0xFFFFEBEE),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                            child: Text(
-                              "Delete",
-                              style: TextStyle(color: Color(0xFFD32F2F)),
-                            ),
+                          child: Text(
+                            "Delete",
+                            style: TextStyle(color: Color(0xFFD32F2F)),
+                          ),
                         ),
                       ),
                     ],

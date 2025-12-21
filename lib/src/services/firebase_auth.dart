@@ -183,3 +183,97 @@ Future<void> logout() async {
   await GoogleSignIn.instance.signOut();
   await _auth.signOut();
 }
+
+
+Future<void> deleteAccount() async {
+  try {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('No user logged in');
+
+    final userId = user.uid;
+
+    // 1. Delete user's notes
+    final notesSnapshot = await _firestore
+        .collection('note')
+        .where('uploadedBy', isEqualTo: userId)
+        .get();
+    
+    for (var noteDoc in notesSnapshot.docs) {
+      final noteId = noteDoc.id;
+      final subId = noteDoc.data()['subId'];
+      
+      // Delete note document
+      await noteDoc.reference.delete();
+      
+      // Update subject's notesCount
+      if (subId != null) {
+        await _firestore.collection('subject').doc(subId).update({
+          'notesCount': FieldValue.increment(-1),
+        });
+      }
+      
+      // Delete all likes for this note
+      final likesSnapshot = await _firestore
+          .collection('likes')
+          .where('noteId', isEqualTo: noteId)
+          .get();
+      for (var likeDoc in likesSnapshot.docs) {
+        await likeDoc.reference.delete();
+      }
+      
+      // Delete all saves for this note
+      final savesSnapshot = await _firestore
+          .collection('savedNotes')
+          .where('noteId', isEqualTo: noteId)
+          .get();
+      for (var saveDoc in savesSnapshot.docs) {
+        await saveDoc.reference.delete();
+      }
+    }
+
+    // 2. Delete user's likes (on other people's notes)
+    final userLikesSnapshot = await _firestore
+        .collection('likes')
+        .where('userId', isEqualTo: userId)
+        .get();
+    
+    for (var likeDoc in userLikesSnapshot.docs) {
+      final noteId = likeDoc.data()['noteId'];
+      await likeDoc.reference.delete();
+      
+      // Decrement the note's likesCount
+      await _firestore.collection('note').doc(noteId).update({
+        'likesCount': FieldValue.increment(-1),
+      });
+    }
+
+    // 3. Delete user's saved notes
+    final userSavesSnapshot = await _firestore
+        .collection('savedNotes')
+        .where('userId', isEqualTo: userId)
+        .get();
+    
+    for (var saveDoc in userSavesSnapshot.docs) {
+      await saveDoc.reference.delete();
+    }
+
+    // 4. Delete user document from Firestore
+    await _firestore.collection('users').doc(userId).delete();
+
+    // 5. Sign out from Google if signed in
+    await GoogleSignIn.instance.signOut();
+
+    // 6. Delete Firebase Auth account
+    await user.delete();
+
+  } on FirebaseAuthException catch (e) {
+    if (e.code == 'requires-recent-login') {
+      throw Exception(
+        'For security, please log out and log back in before deleting your account.',
+      );
+    }
+    throw Exception('Account deletion failed: ${e.message}');
+  } catch (e) {
+    throw Exception('An error occurred while deleting account: $e');
+  }
+}
