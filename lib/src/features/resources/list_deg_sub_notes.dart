@@ -129,6 +129,18 @@ class _ListDegSubNotesPageState extends State<ListDegSubNotesPage> {
           },
         ),
       ),
+      floatingActionButton: widget.subId != null
+          ? FloatingActionButton(
+              onPressed: () async {
+                await context.push(
+                  '/new_resource',
+                );
+                _loadData();
+              },
+              backgroundColor: colors.primary,
+              child: Icon(Icons.add, color: colors.onPrimary),
+            )
+          : null,
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : items.isEmpty
@@ -159,6 +171,7 @@ class _ListDegSubNotesPageState extends State<ListDegSubNotesPage> {
                 );
               },
             ),
+            
     );
   }
 }

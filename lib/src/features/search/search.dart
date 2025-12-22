@@ -179,7 +179,7 @@ class _SearchPageState extends State<SearchPage> {
                             title: dept['id'] ?? '',
                             subtitlle: dept['name'] ?? 'Unknown',
                             onTap: () {
-                              print('Tapped: ${dept['id']}');
+                              // print('Tapped: ${dept['id']}');
                               context.push('/search/dpt/${dept['id']}/degree');
                             },
                           );
