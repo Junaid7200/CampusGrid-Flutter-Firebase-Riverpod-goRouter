@@ -3,7 +3,7 @@ import 'package:campus_grid/src/shared/widgets/search_bar.dart';
 import 'package:campus_grid/src/shared/widgets/search_dpt_card.dart';
 import 'package:campus_grid/src/services/department_service.dart'
     as department_service;
-
+import 'package:go_router/go_router.dart';
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key, this.query, this.type});
 
@@ -114,6 +114,18 @@ class _SearchPageState extends State<SearchPage> {
             padding: EdgeInsets.all(16.0),
             child: Column(
               children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Explore Departments and Search',
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: colors.onSurface,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 16),
                 Row(
                   children: [
                     Expanded(
@@ -168,6 +180,7 @@ class _SearchPageState extends State<SearchPage> {
                             subtitlle: dept['name'] ?? 'Unknown',
                             onTap: () {
                               print('Tapped: ${dept['id']}');
+                              context.push('/search/dpt/${dept['id']}/degree');
                             },
                           );
                         },

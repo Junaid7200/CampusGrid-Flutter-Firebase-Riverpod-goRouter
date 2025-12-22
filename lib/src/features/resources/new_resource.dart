@@ -1,8 +1,7 @@
 import "package:flutter/material.dart";
 import "package:campus_grid/src/shared/widgets/text_field.dart";
 import "package:campus_grid/src/shared/widgets/button.dart";
-import 'package:campus_grid/src/services/department_service.dart'
-    as dept_service;
+import 'package:campus_grid/src/services/department_service.dart' as dept_service;
 import 'package:campus_grid/src/services/degree_service.dart' as deg_service;
 import 'package:campus_grid/src/services/subject_service.dart' as sub_service;
 import 'package:campus_grid/src/services/note_service.dart' as note_service;
@@ -54,13 +53,13 @@ class _NewResourcePageState extends State<NewResourcePage> {
     setState(() => _isLoadingDepts = true);
     try {
       final depts = await dept_service.getDepartments();
-      print('Loaded ${depts.length} departments'); // DEBUG
+      print('Loaded ${depts.length} departments');
       setState(() {
         _departments = depts;
         _isLoadingDepts = false;
       });
     } catch (e) {
-      print('Error loading departments: $e'); // DEBUG
+      print('Error loading departments: $e');
       setState(() => _isLoadingDepts = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -71,7 +70,7 @@ class _NewResourcePageState extends State<NewResourcePage> {
   }
 
   Future<void> _loadDegrees(String deptId) async {
-    print('Loading degrees for department: $deptId'); // DEBUG
+    print('Loading degrees for department: $deptId');
     setState(() {
       _isLoadingDegs = true;
       _selectedDegId = null;
@@ -82,9 +81,9 @@ class _NewResourcePageState extends State<NewResourcePage> {
 
     try {
       final degrees = await deg_service.getDegreesByDepartment(deptId);
-      print('Loaded ${degrees.length} degrees'); // DEBUG
+      print('Loaded ${degrees.length} degrees');
       if (degrees.isNotEmpty) {
-        print('First degree: ${degrees[0]}'); // DEBUG
+        print('First degree: ${degrees[0]}');
       }
 
       setState(() {
@@ -98,7 +97,7 @@ class _NewResourcePageState extends State<NewResourcePage> {
         );
       }
     } catch (e) {
-      print('Error loading degrees: $e'); // DEBUG
+      print('Error loading degrees: $e');
       setState(() => _isLoadingDegs = false);
       if (mounted) {
         ScaffoldMessenger.of(
@@ -109,7 +108,7 @@ class _NewResourcePageState extends State<NewResourcePage> {
   }
 
   Future<void> _loadSubjects(String degId) async {
-    print('Loading subjects for degree: $degId'); // DEBUG
+    print('Loading subjects for degree: $degId');
     setState(() {
       _isLoadingSubs = true;
       _selectedSubId = null;
@@ -118,7 +117,7 @@ class _NewResourcePageState extends State<NewResourcePage> {
 
     try {
       final subjects = await sub_service.getSubjectsByDegree(degId);
-      print('Loaded ${subjects.length} subjects'); // DEBUG
+      print('Loaded ${subjects.length} subjects');
 
       setState(() {
         _subjects = subjects;
@@ -131,7 +130,7 @@ class _NewResourcePageState extends State<NewResourcePage> {
         );
       }
     } catch (e) {
-      print('Error loading subjects: $e'); // DEBUG
+      print('Error loading subjects: $e');
       setState(() => _isLoadingSubs = false);
       if (mounted) {
         ScaffoldMessenger.of(
