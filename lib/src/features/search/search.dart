@@ -65,10 +65,10 @@ class _SearchPageState extends State<SearchPage> {
 
   void _onSearchChanged(String query) {
     searchQuery = query;
-    
+
     // Cancel previous timer
     if (_debounce?.isActive ?? false) _debounce!.cancel();
-    
+
     // If search is empty, show departments
     if (query.trim().isEmpty) {
       setState(() {
@@ -76,7 +76,7 @@ class _SearchPageState extends State<SearchPage> {
       });
       return;
     }
-    
+
     // Start new timer (debounce)
     _debounce = Timer(const Duration(milliseconds: 500), () {
       _performSearch(query);
@@ -95,7 +95,7 @@ class _SearchPageState extends State<SearchPage> {
         searchSubjects: _showSubjects,
         searchNotes: _showNotes,
       );
-      
+
       setState(() {
         searchResults = results;
         isSearching = false;
@@ -217,6 +217,7 @@ class _SearchPageState extends State<SearchPage> {
                         decoration: BoxDecoration(
                           color: Colors.grey[100],
                           borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Color(0xFFE5E7EB)),
                         ),
                         child: Icon(
                           Icons.tune,
@@ -233,35 +234,32 @@ class _SearchPageState extends State<SearchPage> {
                 isLoading
                     ? Center(child: CircularProgressIndicator())
                     : isSearching
-                        ? Center(child: CircularProgressIndicator())
-                        : searchQuery.isEmpty
-                            // Show departments when not searching
-                            ? GridView.builder(
-                                shrinkWrap: true,
-                                physics: NeverScrollableScrollPhysics(),
-                                gridDelegate:
-                                    SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                  crossAxisSpacing: 16,
-                                  mainAxisSpacing: 16,
-                                  childAspectRatio: 1,
-                                ),
-                                itemCount: depts.length,
-                                itemBuilder: (context, index) {
-                                  final dept = depts[index];
-                                  return DptCard(
-                                    title: dept['id'] ?? '',
-                                    subtitlle: dept['name'] ?? 'Unknown',
-                                    onTap: () {
-                                      context.push(
-                                        '/search/dpt/${dept['id']}/degree',
-                                      );
-                                    },
-                                  );
-                                },
-                              )
-                            // Show search results
-                            : _buildSearchResults(),
+                    ? Center(child: CircularProgressIndicator())
+                    : searchQuery.isEmpty
+                    // Show departments when not searching
+                    ? GridView.builder(
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                          childAspectRatio: 1,
+                        ),
+                        itemCount: depts.length,
+                        itemBuilder: (context, index) {
+                          final dept = depts[index];
+                          return DptCard(
+                            title: dept['id'] ?? '',
+                            subtitlle: dept['name'] ?? 'Unknown',
+                            onTap: () {
+                              context.push('/search/dpt/${dept['id']}/degree');
+                            },
+                          );
+                        },
+                      )
+                    // Show search results
+                    : _buildSearchResults(),
               ],
             ),
           ),
@@ -273,8 +271,9 @@ class _SearchPageState extends State<SearchPage> {
   Widget _buildSearchResults() {
     final colors = Theme.of(context).colorScheme;
     final currentUserId = user_service.getCurrentUserId();
-    
-    final hasResults = searchResults['degrees']!.isNotEmpty ||
+
+    final hasResults =
+        searchResults['degrees']!.isNotEmpty ||
         searchResults['subjects']!.isNotEmpty ||
         searchResults['notes']!.isNotEmpty;
 
@@ -315,7 +314,9 @@ class _SearchPageState extends State<SearchPage> {
                 subtitle: degree['description'] ?? 'No description',
                 cardType: 'degree',
                 onTap: () {
-                  context.push('/search/dpt/${degree['dptId']}/degree/${degree['id']}/subject');
+                  context.push(
+                    '/search/dpt/${degree['dptId']}/degree/${degree['id']}/subject',
+                  );
                 },
               ),
             );
@@ -343,7 +344,9 @@ class _SearchPageState extends State<SearchPage> {
                 cardType: 'subject',
                 resourcesCount: subject['notesCount'] ?? 0,
                 onTap: () {
-                  context.push('/search/dpt/${subject['dptId']}/degree/${subject['degId']}/subject/${subject['id']}/notes');
+                  context.push(
+                    '/search/dpt/${subject['dptId']}/degree/${subject['degId']}/subject/${subject['id']}/notes',
+                  );
                 },
               ),
             );
