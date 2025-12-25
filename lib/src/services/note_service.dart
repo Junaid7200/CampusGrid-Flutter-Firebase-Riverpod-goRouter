@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:campus_grid/src/services/user_service.dart' as user_service;
 
 final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -35,7 +36,9 @@ Future<List<Map<String, dynamic>>> getNotesBySubject(String subId) async {
   final snapshot = await _firestore
       .collection('note')
       .where('subId', isEqualTo: subId)
-      .orderBy('createdAt', descending: true)
+      // Note: If you get index error, create composite index in Firebase Console
+      // or temporarily comment out orderBy below
+      // .orderBy('createdAt', descending: true)
       .get();
 
   return snapshot.docs.map((doc) {
@@ -48,7 +51,7 @@ Future<List<Map<String, dynamic>>> getUserNotes(String userId) async {
   final snapshot = await _firestore
       .collection('note')
       .where('uploadedBy', isEqualTo: userId)
-      .orderBy('createdAt', descending: true)
+      // .orderBy('createdAt', descending: true) // i removed this and then it worked in the profiles page weirdly
       .get();
 
   return snapshot.docs.map((doc) {
@@ -73,7 +76,10 @@ Future<String> createNote({
   required String subId,
 }) async {
   final user = _auth.currentUser;
-  if (user == null) throw Exception('No user logged in');
+  // fetch user displayName from the users collection:
+  Map<String, dynamic> profile = await user_service.getUserProfile(user!.uid);
+  String uploaderName = profile['displayName'] ?? 'Unknown';
+  // if (user == null) throw Exception('No user logged in');
 
   final docRef = await _firestore.collection('note').add({
     'title': title,
@@ -83,13 +89,17 @@ Future<String> createNote({
     'fileType': fileType,
     'subId': subId,
     'uploadedBy': user.uid,
-    'uploaderName': user.displayName ?? 'Unknown',
+    'uploaderName': uploaderName,
     'likesCount': 0,
     'createdAt': FieldValue.serverTimestamp(),
   });
 
   // Update subject's notesCount
   await _firestore.collection('subject').doc(subId).update({
+    'notesCount': FieldValue.increment(1),
+  });
+  // udpate notesCount in user document
+  await _firestore.collection('users').doc(user.uid).update({
     'notesCount': FieldValue.increment(1),
   });
 
@@ -101,6 +111,9 @@ Future<void> updateNote({
   required String noteId,
   String? title,
   String? description,
+  String? fileUrl,
+  String? fileName,
+  String? fileType,
 }) async {
   final user = _auth.currentUser;
   if (user == null) throw Exception('No user logged in');
@@ -114,6 +127,9 @@ Future<void> updateNote({
   final updates = <String, dynamic>{};
   if (title != null) updates['title'] = title;
   if (description != null) updates['description'] = description;
+  if (fileUrl != null) updates['fileUrl'] = fileUrl;
+  if (fileName != null) updates['fileName'] = fileName;
+  if (fileType != null) updates['fileType'] = fileType;
 
   if (updates.isNotEmpty) {
     await _firestore.collection('note').doc(noteId).update(updates);
@@ -139,12 +155,33 @@ Future<void> deleteNote(String noteId) async {
   await _firestore.collection('subject').doc(noteData!['subId']).update({
     'notesCount': FieldValue.increment(-1),
   });
+  // decrement notesCount in user document
+  await _firestore.collection('users').doc(user.uid).update({
+    'notesCount': FieldValue.increment(-1),
+  });
 
-  // Delete all likes for this note
+  // if it was a savedNote then decrement savedNotes count in user document
+  final savedSnapshot = await _firestore
+      .collection('savedNotes')
+      .where('noteId', isEqualTo: noteId)
+      .get();
+  if (savedSnapshot.docs.isNotEmpty) {
+    await _firestore.collection('users').doc(user.uid).update({
+      'savedNotes': FieldValue.increment(-1),
+    });
+  }
+  // if it was liked then decrement likesReceived count in user document
   final likesSnapshot = await _firestore
       .collection('likes')
       .where('noteId', isEqualTo: noteId)
       .get();
+  if (likesSnapshot.docs.isNotEmpty) {
+    await _firestore.collection('users').doc(user.uid).update({
+      'likesReceived': FieldValue.increment(-1),
+    });
+  }
+
+  // Delete all likes for this note
   for (var likeDoc in likesSnapshot.docs) {
     await likeDoc.reference.delete();
   }
@@ -183,6 +220,15 @@ Future<void> likeNote(String noteId) async {
   await _firestore.collection('note').doc(noteId).update({
     'likesCount': FieldValue.increment(1),
   });
+  // increment likesCount of that user as well
+  final noteDoc = await _firestore.collection('note').doc(noteId).get();
+  final noteData = noteDoc.data();
+  final noteOwnerId = noteData?['uploadedBy'];
+  if (noteOwnerId != null) {
+    await _firestore.collection('users').doc(noteOwnerId).update({
+      'likesReceived': FieldValue.increment(1),
+    });
+  }
 }
 
 // Unlike a note
@@ -199,6 +245,15 @@ Future<void> unlikeNote(String noteId) async {
   await _firestore.collection('note').doc(noteId).update({
     'likesCount': FieldValue.increment(-1),
   });
+  // decrement likesCount of that user as well
+  final noteDoc = await _firestore.collection('note').doc(noteId).get();
+  final noteData = noteDoc.data();
+  final noteOwnerId = noteData?['uploadedBy'];
+  if (noteOwnerId != null) {
+    await _firestore.collection('users').doc(noteOwnerId).update({
+      'likesReceived': FieldValue.increment(-1),
+    });
+  }
 }
 
 // Check if user liked a note
