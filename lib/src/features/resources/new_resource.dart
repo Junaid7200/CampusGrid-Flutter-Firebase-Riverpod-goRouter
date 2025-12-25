@@ -1,17 +1,19 @@
 import "package:flutter/material.dart";
 import "package:campus_grid/src/shared/widgets/text_field.dart";
 import "package:campus_grid/src/shared/widgets/button.dart";
-import 'package:campus_grid/src/services/department_service.dart' as dept_service;
+import 'package:campus_grid/src/services/department_service.dart'
+    as dept_service;
 import 'package:campus_grid/src/services/degree_service.dart' as deg_service;
 import 'package:campus_grid/src/services/subject_service.dart' as sub_service;
 import 'package:campus_grid/src/services/note_service.dart' as note_service;
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:cloudinary_public/cloudinary_public.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 
 class NewResourcePage extends StatefulWidget {
-  const NewResourcePage({super.key});
+  const NewResourcePage({super.key, this.noteId});
+  final String? noteId; // If provided, this is edit mode
   State<NewResourcePage> createState() => _NewResourcePageState();
 }
 
@@ -35,11 +37,36 @@ class _NewResourcePageState extends State<NewResourcePage> {
   bool _isLoadingDegs = false;
   bool _isLoadingSubs = false;
   bool _isUploading = false;
+  bool _isEditMode = false;
+  String? _existingFileUrl;
+  String? _existingFileType;
 
   @override
   void initState() {
     super.initState();
+    _isEditMode = widget.noteId != null;
     _loadDepartments();
+    if (_isEditMode) {
+      _loadExistingNote();
+    }
+  }
+
+  Future<void> _loadExistingNote() async {
+    try {
+      final note = await note_service.getNoteById(widget.noteId!);
+      if (note != null) {
+        _titleController.text = note['title'] ?? '';
+        _descController.text = note['description'] ?? '';
+        _existingFileUrl = note['fileUrl'];
+        _existingFileType = note['fileType'];
+        _fileName = note['fileName'];
+        _selectedSubId = note['subId'];
+        // Note: We don't load dept/deg dropdowns in edit mode
+        setState(() {});
+      }
+    } catch (e) {
+      print('Error loading note: $e');
+    }
   }
 
   @override
@@ -195,14 +222,14 @@ class _NewResourcePageState extends State<NewResourcePage> {
   Future<void> _uploadResource() async {
     if (!_formKey.currentState!.validate()) return;
 
-    if (_selectedSubId == null) {
+    if (!_isEditMode && _selectedSubId == null) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Please select a subject')));
       return;
     }
 
-    if (_selectedFile == null) {
+    if (!_isEditMode && _selectedFile == null) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Please select a file to upload')));
@@ -212,47 +239,74 @@ class _NewResourcePageState extends State<NewResourcePage> {
     setState(() => _isUploading = true);
 
     try {
-      // 1. Upload file to Firebase Storage
-      final fileName = '${DateTime.now().millisecondsSinceEpoch}_$_fileName';
-      final storageRef = FirebaseStorage.instance.ref().child(
-        'notes/$fileName',
-      );
-      final uploadTask = await storageRef.putFile(_selectedFile!);
-      final fileUrl = await uploadTask.ref.getDownloadURL();
+      String? fileUrl = _existingFileUrl;
+      String? fileType = _existingFileType;
 
-      // 2. Determine file type
-      final fileExtension = _fileName!.split('.').last.toLowerCase();
-      String fileType = 'document';
-      if (fileExtension == 'pdf') {
-        fileType = 'pdf';
-      } else if (['png', 'jpg', 'jpeg'].contains(fileExtension)) {
-        fileType = 'image';
+      // 1. Upload new file if selected (for both create and edit)
+      if (_selectedFile != null) {
+        final cloudinary = CloudinaryPublic('djm4otpkd', 'note_files');
+        final response = await cloudinary.uploadFile(
+          CloudinaryFile.fromFile(
+            _selectedFile!.path,
+            resourceType: CloudinaryResourceType.Raw, // Supports all file types
+            folder: 'campus_grid/notes',
+          ),
+        );
+        fileUrl = response.secureUrl;
+
+        // 2. Determine file type
+        final fileExtension = _fileName!.split('.').last.toLowerCase();
+        fileType = 'document';
+        if (fileExtension == 'pdf') {
+          fileType = 'pdf';
+        } else if (['png', 'jpg', 'jpeg'].contains(fileExtension)) {
+          fileType = 'image';
+        }
       }
 
-      // 3. Create note in Firestore
-      await note_service.createNote(
-        title: _titleController.text.trim(),
-        description: _descController.text.trim(),
-        fileUrl: fileUrl,
-        fileName: _fileName!,
-        fileType: fileType,
-        subId: _selectedSubId!,
-      );
+      // 3. Create or update note in Firestore
+      if (_isEditMode) {
+        await note_service.updateNote(
+          noteId: widget.noteId!,
+          title: _titleController.text.trim(),
+          description: _descController.text.trim(),
+          fileUrl: _selectedFile != null ? fileUrl : null,
+          fileName: _selectedFile != null ? _fileName : null,
+          fileType: _selectedFile != null ? fileType : null,
+        );
+      } else {
+        await note_service.createNote(
+          title: _titleController.text.trim(),
+          description: _descController.text.trim(),
+          fileUrl: fileUrl!,
+          fileName: _fileName!,
+          fileType: fileType!,
+          subId: _selectedSubId!,
+        );
+      }
 
       setState(() => _isUploading = false);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Resource uploaded successfully!')),
+          SnackBar(
+            content: Text(
+              _isEditMode
+                  ? 'Resource updated successfully!'
+                  : 'Resource uploaded successfully!',
+            ),
+          ),
         );
-        context.go('/profile'); // Navigate to profile to see uploaded note
+        context.pop(); // Go back to previous page
       }
     } catch (e) {
       setState(() => _isUploading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Upload failed: $e'),
+            content: Text(
+              _isEditMode ? 'Update failed: $e' : 'Upload failed: $e',
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -266,7 +320,10 @@ class _NewResourcePageState extends State<NewResourcePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Upload Resource', style: TextStyle(color: colors.primary)),
+        title: Text(
+          _isEditMode ? 'Edit Resource' : 'Upload Resource',
+          style: TextStyle(color: colors.primary),
+        ),
         leading: IconButton(
           icon: Icon(Icons.chevron_left, size: 32, color: colors.primary),
           onPressed: () => context.pop(),
@@ -309,141 +366,143 @@ class _NewResourcePageState extends State<NewResourcePage> {
                 ),
                 const SizedBox(height: 16),
 
-                // Department Dropdown
-                Text(
-                  "Department",
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-                const SizedBox(height: 8),
-                _isLoadingDepts
-                    ? Container(
-                        height: 56,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: colors.outline),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: CircularProgressIndicator(),
-                      )
-                    : DropdownButtonFormField<String>(
-                        decoration: InputDecoration(
-                          hintText: 'Select department',
-                          border: OutlineInputBorder(
+                // Department Dropdown (only for new resources)
+                if (!_isEditMode) ...[
+                  Text(
+                    "Department",
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                  const SizedBox(height: 8),
+                  _isLoadingDepts
+                      ? Container(
+                          height: 56,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: colors.outline),
                             borderRadius: BorderRadius.circular(8),
                           ),
+                          child: CircularProgressIndicator(),
+                        )
+                      : DropdownButtonFormField<String>(
+                          decoration: InputDecoration(
+                            hintText: 'Select department',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          initialValue: _selectedDeptId,
+                          items: _departments.map((dept) {
+                            return DropdownMenuItem<String>(
+                              value: dept['id'],
+                              child: Text(dept['name'] ?? 'Unknown'),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            print('Selected department: $value'); // DEBUG
+                            setState(() => _selectedDeptId = value);
+                            if (value != null) _loadDegrees(value);
+                          },
+                          validator: (value) {
+                            if (value == null)
+                              return 'Please select a department';
+                            return null;
+                          },
                         ),
-                        initialValue: _selectedDeptId,
-                        items: _departments.map((dept) {
-                          return DropdownMenuItem<String>(
-                            value: dept['id'],
-                            child: Text(dept['name'] ?? 'Unknown'),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          print('Selected department: $value'); // DEBUG
-                          setState(() => _selectedDeptId = value);
-                          if (value != null) _loadDegrees(value);
-                        },
-                        validator: (value) {
-                          if (value == null)
-                            return 'Please select a department';
-                          return null;
-                        },
-                      ),
-                const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-                // Degree Dropdown
-                Text("Degree", style: Theme.of(context).textTheme.bodyLarge),
-                const SizedBox(height: 8),
-                _isLoadingDegs
-                    ? Container(
-                        height: 56,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: colors.outline),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: CircularProgressIndicator(),
-                      )
-                    : DropdownButtonFormField<String>(
-                        decoration: InputDecoration(
-                          hintText: _selectedDeptId == null
-                              ? 'Select department first'
-                              : _degrees.isEmpty
-                              ? 'No degrees available'
-                              : 'Select degree',
-                          border: OutlineInputBorder(
+                  // Degree Dropdown
+                  Text("Degree", style: Theme.of(context).textTheme.bodyLarge),
+                  const SizedBox(height: 8),
+                  _isLoadingDegs
+                      ? Container(
+                          height: 56,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: colors.outline),
                             borderRadius: BorderRadius.circular(8),
                           ),
+                          child: CircularProgressIndicator(),
+                        )
+                      : DropdownButtonFormField<String>(
+                          decoration: InputDecoration(
+                            hintText: _selectedDeptId == null
+                                ? 'Select department first'
+                                : _degrees.isEmpty
+                                ? 'No degrees available'
+                                : 'Select degree',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          initialValue: _selectedDegId,
+                          items: _degrees.map((deg) {
+                            return DropdownMenuItem<String>(
+                              value: deg['id'],
+                              child: Text(deg['name'] ?? 'Unknown'),
+                            );
+                          }).toList(),
+                          onChanged: _selectedDeptId == null || _degrees.isEmpty
+                              ? null
+                              : (value) {
+                                  print('Selected degree: $value'); // DEBUG
+                                  setState(() => _selectedDegId = value);
+                                  if (value != null) _loadSubjects(value);
+                                },
+                          validator: (value) {
+                            if (value == null) return 'Please select a degree';
+                            return null;
+                          },
                         ),
-                        initialValue: _selectedDegId,
-                        items: _degrees.map((deg) {
-                          return DropdownMenuItem<String>(
-                            value: deg['id'],
-                            child: Text(deg['name'] ?? 'Unknown'),
-                          );
-                        }).toList(),
-                        onChanged: _selectedDeptId == null || _degrees.isEmpty
-                            ? null
-                            : (value) {
-                                print('Selected degree: $value'); // DEBUG
-                                setState(() => _selectedDegId = value);
-                                if (value != null) _loadSubjects(value);
-                              },
-                        validator: (value) {
-                          if (value == null) return 'Please select a degree';
-                          return null;
-                        },
-                      ),
-                const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-                // Subject Dropdown
-                Text("Subject", style: Theme.of(context).textTheme.bodyLarge),
-                const SizedBox(height: 8),
-                _isLoadingSubs
-                    ? Container(
-                        height: 56,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: colors.outline),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: CircularProgressIndicator(),
-                      )
-                    : DropdownButtonFormField<String>(
-                        decoration: InputDecoration(
-                          hintText: _selectedDegId == null
-                              ? 'Select degree first'
-                              : _subjects.isEmpty
-                              ? 'No subjects available'
-                              : 'Select subject',
-                          border: OutlineInputBorder(
+                  // Subject Dropdown
+                  Text("Subject", style: Theme.of(context).textTheme.bodyLarge),
+                  const SizedBox(height: 8),
+                  _isLoadingSubs
+                      ? Container(
+                          height: 56,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: colors.outline),
                             borderRadius: BorderRadius.circular(8),
                           ),
+                          child: CircularProgressIndicator(),
+                        )
+                      : DropdownButtonFormField<String>(
+                          decoration: InputDecoration(
+                            hintText: _selectedDegId == null
+                                ? 'Select degree first'
+                                : _subjects.isEmpty
+                                ? 'No subjects available'
+                                : 'Select subject',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          initialValue: _selectedSubId,
+                          items: _subjects.map((sub) {
+                            return DropdownMenuItem<String>(
+                              value: sub['id'],
+                              child: Text(sub['name'] ?? 'Unknown'),
+                            );
+                          }).toList(),
+                          onChanged: _selectedDegId == null || _subjects.isEmpty
+                              ? null
+                              : (value) {
+                                  print('Selected subject: $value'); // DEBUG
+                                  setState(() => _selectedSubId = value);
+                                },
+                          validator: (value) {
+                            if (value == null) return 'Please select a subject';
+                            return null;
+                          },
                         ),
-                        initialValue: _selectedSubId,
-                        items: _subjects.map((sub) {
-                          return DropdownMenuItem<String>(
-                            value: sub['id'],
-                            child: Text(sub['name'] ?? 'Unknown'),
-                          );
-                        }).toList(),
-                        onChanged: _selectedDegId == null || _subjects.isEmpty
-                            ? null
-                            : (value) {
-                                print('Selected subject: $value'); // DEBUG
-                                setState(() => _selectedSubId = value);
-                              },
-                        validator: (value) {
-                          if (value == null) return 'Please select a subject';
-                          return null;
-                        },
-                      ),
+                ],
                 const SizedBox(height: 24),
 
                 // File Upload Section
                 Text(
-                  "Upload File",
+                  _isEditMode ? "Upload New File (optional)" : "Upload File",
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 const SizedBox(height: 8),
@@ -498,7 +557,7 @@ class _NewResourcePageState extends State<NewResourcePage> {
 
                 // Submit Button
                 CustomButton(
-                  text: 'Submit Resource',
+                  text: _isEditMode ? 'Update Resource' : 'Submit Resource',
                   onPressed: _uploadResource,
                   isLoading: _isUploading,
                 ),
