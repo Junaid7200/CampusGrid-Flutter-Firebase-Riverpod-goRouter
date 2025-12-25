@@ -49,6 +49,7 @@ class _ProfilePageState extends State<ProfilePage> {
     });
     try {
       final userId = user_service.getCurrentUserId();
+      print('userId in profile page: $userId');
       if (userId != null) {
         userNotes = await note_service.getUserNotes(userId);
         setState(() {});
@@ -60,6 +61,7 @@ class _ProfilePageState extends State<ProfilePage> {
         isLoading = false;
       });
     }
+    print('Loaded ${userNotes.length} notes for user.');
   }
 
   @override
@@ -257,6 +259,8 @@ class _ProfilePageState extends State<ProfilePage> {
                       // Navigate to note details
                       context.push('/view_resource/${note['id']}');
                     },
+                    noteId: note['id'],
+                    onRefresh: _loadUserNotes,
                   );
                 }).toList(),
               SizedBox(height: 16),
@@ -298,6 +302,11 @@ class _ProfilePageState extends State<ProfilePage> {
                             isLoggingOut = false;
                           });
                         },
+                      ),
+                      SizedBox(height: 8),
+                      CustomOutlinedButton(
+                        text: "Edit Profile",
+                        onPressed: () => context.push('/edit_profile'),
                       ),
                       SizedBox(height: 8),
                       CustomOutlinedButton(
