@@ -82,7 +82,7 @@ class _LibraryPageState extends State<LibraryPage> {
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
-                        color: colors.onSurface.withAlpha(60),
+                        color: colors.primary,
                       ),
                     ),
                   ),
