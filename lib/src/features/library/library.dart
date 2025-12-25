@@ -2,18 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:campus_grid/src/shared/widgets/search_bar.dart';
 import 'package:campus_grid/src/shared/widgets/verstile_card.dart';
 import 'package:campus_grid/src/services/note_service.dart' as note_service;
-
-
-
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:go_router/go_router.dart';
 
 class LibraryPage extends StatefulWidget {
-  const LibraryPage({
-    super.key,
-    this.query,
-    this.sort,
-    });
-    final String? query;
-    final String? sort;
+  const LibraryPage({super.key, this.query, this.sort});
+  final String? query;
+  final String? sort;
 
   State<LibraryPage> createState() => _LibraryPageState();
 }
@@ -21,6 +16,8 @@ class LibraryPage extends StatefulWidget {
 class _LibraryPageState extends State<LibraryPage> {
   final TextEditingController controller = TextEditingController();
   List<Map<String, dynamic>> libraryItems = [];
+  List<Map<String, dynamic>> filteredItems = [];
+  String searchQuery = '';
   int totalLibraryItems = 0;
   bool isLoading = false;
 
@@ -34,11 +31,28 @@ class _LibraryPageState extends State<LibraryPage> {
       isLoading = true;
     });
     libraryItems = await note_service.getUserSavedNotes();
+    filteredItems = libraryItems;
     totalLibraryItems = libraryItems.length;
     setState(() {
       isLoading = false;
     });
-    // Fetch library items logic here
+  }
+
+  void _onSearchChanged(String query) {
+    setState(() {
+      searchQuery = query;
+      if (query.isEmpty) {
+        filteredItems = libraryItems;
+      } else {
+        filteredItems = libraryItems.where((item) {
+          final title = (item['title'] ?? '').toLowerCase();
+          final description = (item['description'] ?? '').toLowerCase();
+          final searchLower = query.toLowerCase();
+          return title.contains(searchLower) ||
+              description.contains(searchLower);
+        }).toList();
+      }
+    });
   }
 
   void onTap() {
@@ -51,8 +65,10 @@ class _LibraryPageState extends State<LibraryPage> {
       return const Center(child: CircularProgressIndicator());
     }
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
+      body: RefreshIndicator(
+        onRefresh: _fetchLibraryItems,
+        child: SafeArea(
+          child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -72,7 +88,13 @@ class _LibraryPageState extends State<LibraryPage> {
                   ),
                   const SizedBox(height: 16),
                   // library search bar
-                  CustomSearchBar(hintText: "Search saved resources...", controller: controller, onTap: onTap, onChanged: (value) {}, onSubmit: (value) {}),
+                  CustomSearchBar(
+                    hintText: "Search saved resources...",
+                    controller: controller,
+                    onTap: onTap,
+                    onChanged: _onSearchChanged,
+                    onSubmit: (value) {},
+                  ),
                   const SizedBox(height: 16),
                   // saved resources count
                   Align(
@@ -81,18 +103,20 @@ class _LibraryPageState extends State<LibraryPage> {
                       'You have $totalLibraryItems saved resources',
                       style: TextStyle(
                         fontSize: 16,
-                        color: colors.onSurface.withAlpha(30),
+                        color: colors.onSurface.withAlpha(60),
                       ),
                     ),
                   ),
                   const SizedBox(height: 8),
                   // listview builder, vertical list of verstile cards
-                  if (libraryItems.isEmpty)
+                  if (filteredItems.isEmpty)
                     Center(
                       child: Padding(
                         padding: const EdgeInsets.only(top: 50.0),
                         child: Text(
-                          'No saved resources yet.',
+                          searchQuery.isEmpty
+                              ? 'No saved resources yet.'
+                              : 'No results found for "$searchQuery"',
                           style: TextStyle(
                             fontSize: 16,
                             color: colors.onSurface.withAlpha(50),
@@ -104,29 +128,38 @@ class _LibraryPageState extends State<LibraryPage> {
                     ListView.builder(
                       physics: const NeverScrollableScrollPhysics(),
                       shrinkWrap: true,
-                      itemCount: libraryItems.length,
+                      itemCount: filteredItems.length,
                       itemBuilder: (context, index) {
-                        final item = libraryItems[index];
+                        final item = filteredItems[index];
+                        final currentUserId =
+                            FirebaseAuth.instance.currentUser?.uid;
+                        final isMyNote = item['uploadedBy'] == currentUserId;
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 4.0),
                           child: VerstileCard(
                             title: item['title'] ?? 'Untitled',
                             subtitle: item['description'] ?? 'No description',
-                            onTap: () {
-                              // Handle card tap
+                            onTap: () async {
+                              await context.push(
+                                '/view_resource/${item['id']}',
+                              );
+                              _fetchLibraryItems();
                             },
-                            cardType: 'myNote',
+                            cardType: isMyNote ? 'myNote' : 'note',
                             authorName: item['uploaderName'] ?? 'Unknown',
                             likesCount: item['likesCount'] ?? 0,
+                            noteId: item['id'],
+                            onRefresh: _fetchLibraryItems,
                           ),
                         );
                       },
                     ),
                 ],
               ),
-            )
+            ),
+          ),
         ),
-      )
+      ),
     );
   }
 }
