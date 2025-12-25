@@ -43,3 +43,16 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+CONTINUATION_PLAN.md
+
+# Keystore files
+*.jks
+*.keystore
+key.properties
+
+# APK files
+*.apk
+
+# App icons (generated)
+android/app/src/main/res/mipmap-*/ic_launcher.png
