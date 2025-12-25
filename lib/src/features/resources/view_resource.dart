@@ -123,7 +123,8 @@ class _ViewResourcePageState extends State<ViewResourcePage> {
       setState(() => _isSaveLoading = false);
     }
   }
-Future<void> _handleDownload() async {
+
+  Future<void> _handleDownload() async {
     setState(() {
       _isDownloading = true;
       _downloadProgress = 0.0;
@@ -136,8 +137,8 @@ Future<void> _handleDownload() async {
         if (!status.isGranted) {
           status = await Permission.storage.request();
         }
-        
-        // On Android 13+, storage permission is sometimes not needed 
+
+        // On Android 13+, storage permission is sometimes not needed
         // for writing to public downloads, but it's good practice to check.
       }
 
@@ -147,7 +148,7 @@ Future<void> _handleDownload() async {
         directory = Directory('/storage/emulated/0/Download');
         // If the directory doesn't exist (rare), fallback to documents
         if (!await directory.exists()) {
-          directory = await getExternalStorageDirectory(); 
+          directory = await getExternalStorageDirectory();
         }
       } else {
         // iOS: Use documents (Users access this via Files app if UIFileSharingEnabled is true)
@@ -175,7 +176,7 @@ Future<void> _handleDownload() async {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             // Show the actual path so you can find it
-            content: Text('Saved to Downloads: ${note['fileName']}'), 
+            content: Text('Saved to Downloads: ${note['fileName']}'),
             backgroundColor: Colors.green,
             duration: Duration(seconds: 4),
           ),
@@ -185,7 +186,8 @@ Future<void> _handleDownload() async {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Download failed: ${e.toString()}'),
+            // content: Text('Download failed: ${e.toString()}'),
+            content: Text('Download failed: This note has no attached file.'),
             backgroundColor: Colors.red,
           ),
         );
