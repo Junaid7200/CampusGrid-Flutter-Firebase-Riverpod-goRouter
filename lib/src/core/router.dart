@@ -9,6 +9,7 @@ import "../features/home/home.dart";
 import "../features/search/search.dart";
 import "../features/library/library.dart";
 import "../features/profile/profile.dart";
+import "../features/profile/edit_profile.dart";
 import "../features/resources/list_deg_sub_notes.dart";
 import "../features/resources/new_resource.dart";
 import "../features/resources/view_resource.dart";
@@ -108,7 +109,14 @@ final GoRouter appRouter = GoRouter(
     // add a resource
     GoRoute(
       path: "/new_resource",
-      builder: (context, state) => const NewResourcePage(),
+      builder: (context, state) => NewResourcePage(
+        noteId: state.uri.queryParameters["noteId"],
+      ),
+    ),
+    // edit profile
+    GoRoute(
+      path: "/edit_profile",
+      builder: (context, state) => const EditProfilePage(),
     ),
     // view all notes from home (NEW)
     GoRoute(
