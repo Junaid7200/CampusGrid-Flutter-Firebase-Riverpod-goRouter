@@ -44,7 +44,6 @@ class _LoginPageState extends State<LoginPage> {
           _email_controller.text,
           _password_controller.text,
         );
-
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Login successful! Welcome back.')),
