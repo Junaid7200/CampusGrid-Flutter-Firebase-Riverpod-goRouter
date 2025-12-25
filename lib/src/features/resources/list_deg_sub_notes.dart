@@ -131,16 +131,18 @@ class _ListDegSubNotesPageState extends State<ListDegSubNotesPage> {
         ),
         actions: [
           IconButton(
-            onPressed: () {context.go('/home');}, icon: Icon(Icons.home), color: colors.primary,
+            onPressed: () {
+              context.go('/home');
+            },
+            icon: Icon(Icons.home),
+            color: colors.primary,
           ),
         ],
       ),
       floatingActionButton: widget.subId != null
           ? FloatingActionButton(
               onPressed: () async {
-                await context.push(
-                  '/new_resource',
-                );
+                await context.push('/new_resource');
                 _loadData();
               },
               backgroundColor: colors.primary,
@@ -154,10 +156,7 @@ class _ListDegSubNotesPageState extends State<ListDegSubNotesPage> {
           ? Center(
               child: Text(
                 'No items found',
-                style: TextStyle(
-                  fontSize: 18,
-                  color: colors.primary,
-                ),
+                style: TextStyle(fontSize: 18, color: colors.primary),
               ),
             )
           : ListView.builder(
@@ -170,9 +169,23 @@ class _ListDegSubNotesPageState extends State<ListDegSubNotesPage> {
                 final isMyNote = item['uploadedBy'] == currentUserId;
 
                 return VerstileCard(
-                  title: item['title'] ?? item['name'] ?? 'Untitled',
-                  subtitle: item['description'] ?? item['id'] ?? 'No description',
-                  cardType: cardType == 'note' && isMyNote ? 'myNote' : cardType,
+                  title: (item['title'] ?? item['name'] ?? 'Untitled')
+                      .split(' ')
+                      .map(
+                        (word) => word.isEmpty
+                            ? word
+                            : word[0].toUpperCase() +
+                                  word.substring(1).toLowerCase(),
+                      )
+                      .join(' '),
+                  subtitle:
+                      item['description'] != null &&
+                          item['description'].isNotEmpty
+                      ? item['description']
+                      : (item['id']?.toUpperCase() ?? 'No description'),
+                  cardType: cardType == 'note' && isMyNote
+                      ? 'myNote'
+                      : cardType,
                   likesCount: item['likesCount'],
                   resourcesCount: item['notesCount'],
                   authorName: item['uploaderName'],
@@ -182,7 +195,6 @@ class _ListDegSubNotesPageState extends State<ListDegSubNotesPage> {
                 );
               },
             ),
-            
     );
   }
 }
