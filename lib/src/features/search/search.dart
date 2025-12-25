@@ -189,9 +189,9 @@ class _SearchPageState extends State<SearchPage> {
                   child: Text(
                     'Explore Departments and Search',
                     style: TextStyle(
-                      fontSize: 32,
+                      fontSize: 28,
                       fontWeight: FontWeight.bold,
-                      color: colors.onSurface,
+                      color: colors.onSurface.withAlpha(60),
                     ),
                   ),
                 ),
