@@ -42,23 +42,47 @@ Future<void> updateUserProfile({String? displayName}) async {
       'displayName': displayName,
     });
   }
+  if (displayName != null) {
+    final userNotes = await _firestore
+        .collection('note')
+        .where('uploadedBy', isEqualTo: user.uid)
+        .get();
+
+    final batch = _firestore.batch();
+    for (var doc in userNotes.docs) {
+      batch.update(doc.reference, {'uploaderName': displayName});
+    }
+    await batch.commit();
+  }
 }
 
-Future<void> updateUserEmail(String newEmail, String currentPassword) async {
+Future<void> updateUserEmail(String newEmail, {String? currentPassword}) async {
   final user = _auth.currentUser;
   if (user == null) throw Exception('No user logged in');
 
-  // Re-authenticate user first
-  final credential = EmailAuthProvider.credential(
-    email: user.email!,
-    password: currentPassword,
-  );
-  await user.reauthenticateWithCredential(credential);
+  // Check if user signed in with email/password or Google
+  final signInMethod = user.providerData.first.providerId;
 
-  // Now update email
+  if (signInMethod == 'password') {
+    // Email/Password user - use password re-auth
+    if (currentPassword == null) {
+      throw Exception('Password required for email users');
+    }
+    final credential = EmailAuthProvider.credential(
+      email: user.email!,
+      password: currentPassword,
+    );
+    await user.reauthenticateWithCredential(credential);
+  } else if (signInMethod == 'google.com') {
+    // Google user - re-authenticate with Google
+    // This would require user to sign in with Google again
+    throw Exception(
+      'Google users cannot change email. Please contact support.',
+    );
+    // OR implement Google re-authentication flow
+  }
+
   await user.verifyBeforeUpdateEmail(newEmail);
-
-  // Update Firestore after verification
   await _firestore.collection('users').doc(user.uid).update({
     'email': newEmail,
   });
