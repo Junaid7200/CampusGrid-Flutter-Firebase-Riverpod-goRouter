@@ -7,13 +7,12 @@ import 'package:go_router/go_router.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
+  @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  final String? displayName = user_service
-      .getCurrentUserDisplayName()
-      ?.toUpperCase();
+  String? displayName = null;
   List<Map<String, dynamic>> _mostLikedNotes = [];
   List<Map<String, dynamic>> _recentlyAddedNotes = [];
   bool _isLoading = true;
@@ -22,6 +21,13 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _loadNotes();
+    _fetchDisplayName();
+  }
+
+
+  Future<void> _fetchDisplayName() async {
+    final userObject = await user_service.getCurrentUserProfile();
+    displayName = userObject?['displayName']?.toUpperCase();
   }
 
   Future<void> _loadNotes() async {
@@ -47,7 +53,10 @@ class _HomePageState extends State<HomePage> {
     final colors = Theme.of(context).colorScheme;
     return Scaffold(
       body: RefreshIndicator(
-        onRefresh: _loadNotes,
+        onRefresh: () async {
+          await _loadNotes();
+          await _fetchDisplayName();
+        },
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
 
@@ -73,7 +82,7 @@ class _HomePageState extends State<HomePage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Welcome Back,",
+                            "Welcome,",
                             style: TextStyle(
                               color: colors.onPrimary,
                               fontSize: 14,
@@ -131,6 +140,8 @@ class _HomePageState extends State<HomePage> {
                                 );
                                 _loadNotes();
                               },
+                              noteId: note['id'],
+                              onRefresh: _loadNotes,
                             ),
                           );
                         },
@@ -169,6 +180,8 @@ class _HomePageState extends State<HomePage> {
                             await context.push('/view_resource/${note['id']}');
                             _loadNotes();
                           },
+                          noteId: note['id'],
+                          onRefresh: _loadNotes,
                         );
                       },
                     ),
