@@ -56,3 +56,5 @@ key.properties
 
 # App icons (generated)
 android/app/src/main/res/mipmap-*/ic_launcher.png
+
+.vscode/
