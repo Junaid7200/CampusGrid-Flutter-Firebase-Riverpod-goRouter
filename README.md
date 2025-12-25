@@ -5,6 +5,7 @@ A peer-to-peer learning platform for university students to share and discover a
 ## 📱 About
 
 Campus Grid is a Flutter-based mobile application that enables students to:
+
 - Share notes, assignments, and study materials
 - Browse resources by department, degree, and subject
 - Search for specific academic content
