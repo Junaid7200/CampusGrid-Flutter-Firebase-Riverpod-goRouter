@@ -1,7 +1,0 @@
-{
-  "dart.analysisExcludedFolders": [
-    "W:/flutter_pub_cache",
-    "C:/Users/junai/AppData/Local/Pub/Cache"
-  ],
-  "java.import.exclusions": ["**/flutter_pub_cache/**", "**/.pub-cache/**"]
-}
