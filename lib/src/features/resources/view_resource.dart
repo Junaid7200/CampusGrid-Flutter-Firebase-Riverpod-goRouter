@@ -3,6 +3,10 @@ import 'package:campus_grid/src/services/note_service.dart' as note_service;
 import 'package:go_router/go_router.dart';
 import 'package:campus_grid/src/shared/widgets/button.dart';
 import 'package:campus_grid/src/shared/widgets/outlined_button.dart';
+import 'package:dio/dio.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'dart:io';
 
 class ViewResourcePage extends StatefulWidget {
   const ViewResourcePage({super.key, required this.resourceId});
@@ -17,6 +21,8 @@ class _ViewResourcePageState extends State<ViewResourcePage> {
   bool _isSaved = false;
   bool _isLikeLoading = false;
   bool _isSaveLoading = false;
+  bool _isDownloading = false;
+  double _downloadProgress = 0.0;
 
   @override
   void initState() {
@@ -115,6 +121,80 @@ class _ViewResourcePageState extends State<ViewResourcePage> {
       }
     } finally {
       setState(() => _isSaveLoading = false);
+    }
+  }
+Future<void> _handleDownload() async {
+    setState(() {
+      _isDownloading = true;
+      _downloadProgress = 0.0;
+    });
+
+    try {
+      // 1. Request Permission
+      if (Platform.isAndroid) {
+        var status = await Permission.storage.status;
+        if (!status.isGranted) {
+          status = await Permission.storage.request();
+        }
+        
+        // On Android 13+, storage permission is sometimes not needed 
+        // for writing to public downloads, but it's good practice to check.
+      }
+
+      // 2. Determine the correct Save Path (Public Downloads for Android)
+      Directory? directory;
+      if (Platform.isAndroid) {
+        directory = Directory('/storage/emulated/0/Download');
+        // If the directory doesn't exist (rare), fallback to documents
+        if (!await directory.exists()) {
+          directory = await getExternalStorageDirectory(); 
+        }
+      } else {
+        // iOS: Use documents (Users access this via Files app if UIFileSharingEnabled is true)
+        directory = await getApplicationDocumentsDirectory();
+      }
+
+      final savePath = '${directory!.path}/${note['fileName']}';
+      print("Saving to: $savePath"); // Debug print to see the path
+
+      // 3. Download
+      final dio = Dio();
+      await dio.download(
+        note['fileUrl'],
+        savePath,
+        onReceiveProgress: (received, total) {
+          if (total != -1) {
+            setState(() {
+              _downloadProgress = received / total;
+            });
+          }
+        },
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            // Show the actual path so you can find it
+            content: Text('Saved to Downloads: ${note['fileName']}'), 
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 4),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Download failed: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      setState(() {
+        _isDownloading = false;
+        _downloadProgress = 0.0;
+      });
     }
   }
 
@@ -238,13 +318,11 @@ class _ViewResourcePageState extends State<ViewResourcePage> {
                         // Download Button
                         CustomOutlinedButton(
                           leadingIcon: Icons.download_rounded,
-                          text: "Download Resource",
-                          onPressed: () {
-                            // TODO: Implement download
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Download coming soon!')),
-                            );
-                          },
+                          text: _isDownloading
+                              ? 'Downloading... ${(_downloadProgress * 100).toInt()}%'
+                              : 'Download Resource',
+                          onPressed: _isDownloading ? null : _handleDownload,
+                          isLoading: _isDownloading,
                         ),
                         SizedBox(height: 12),
 
