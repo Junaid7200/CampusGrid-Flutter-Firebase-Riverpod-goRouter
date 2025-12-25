@@ -8,6 +8,7 @@ final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
 bool _isGoogleSignInInitialized = false;
 
+
 Future<User?> loginWithEmail(String email, String password) async {
   try {
     final userCredential = await _auth.signInWithEmailAndPassword(
@@ -16,18 +17,39 @@ Future<User?> loginWithEmail(String email, String password) async {
     );
     return userCredential.user;
   } on FirebaseAuthException catch (e) {
-    if (e.code == 'user-not-found') {
-      throw Exception('No user found for that email.');
-    } else if (e.code == 'wrong-password') {
-      throw Exception('Wrong password provided.');
+    print("Firebase Auth Error Code: ${e.code}"); 
+
+    if (e.code == 'user-not-found' || e.code == 'wrong-password' || e.code == 'invalid-credential' || e.code == 'INVALID_LOGIN_CREDENTIALS') {
+      throw Exception('Invalid email or password.');
     } else if (e.code == 'invalid-email') {
-      throw Exception('Invalid email address.');
+      throw Exception('The email address is badly formatted.');
     }
-    throw Exception('Login failed: ${e.message}');
+    throw Exception(e.message ?? 'Login failed.');
   } catch (e) {
     throw Exception('An error occurred during login.');
   }
 }
+
+// Future<User?> loginWithEmail(String email, String password) async {
+//   try {
+//     final userCredential = await _auth.signInWithEmailAndPassword(
+//       email: email,
+//       password: password,
+//     );
+//     return userCredential.user;
+//   } on FirebaseAuthException catch (e) {
+//     if (e.code == 'user-not-found') {
+//       throw Exception('No user found for that email.');
+//     } else if (e.code == 'wrong-password') {
+//       throw Exception('Wrong password provided.');
+//     } else if (e.code == 'invalid-email') {
+//       throw Exception('Invalid email address.');
+//     }
+//     throw Exception('Login failed: ${e.message}');
+//   } catch (e) {
+//     throw Exception('An error occurred during login.');
+//   }
+// }
 
 Future<User?> signupWithEmail(
   String email,
@@ -149,14 +171,25 @@ Future<User?> signInWithGoogle() async {
 
     // Create or update user document in Firestore
     if (user != null) {
-      await _firestore.collection('users').doc(user.uid).set({
-        'displayName': user.displayName ?? 'No Name',
-        'email': user.email,
-        'createdAt': FieldValue.serverTimestamp(),
-        'notesCount': 0,
-        'likesReceived': 0,
-        'savedNotes': 0,
-      }, SetOptions(merge: true));
+      final userDoc = await _firestore.collection('users').doc(user.uid).get();
+      
+      if (userDoc.exists) {
+        // Existing user - only update display name and email
+        await _firestore.collection('users').doc(user.uid).update({
+          'displayName': user.displayName ?? 'No Name',
+          'email': user.email,
+        });
+      } else {
+        // New user - initialize with default values
+        await _firestore.collection('users').doc(user.uid).set({
+          'displayName': user.displayName ?? 'No Name',
+          'email': user.email,
+          'createdAt': FieldValue.serverTimestamp(),
+          'notesCount': 0,
+          'likesReceived': 0,
+          'savedNotes': 0,
+        });
+      }
     }
 
     return user;
