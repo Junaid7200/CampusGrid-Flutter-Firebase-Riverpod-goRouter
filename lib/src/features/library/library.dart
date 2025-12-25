@@ -68,95 +68,98 @@ class _LibraryPageState extends State<LibraryPage> {
       body: RefreshIndicator(
         onRefresh: _fetchLibraryItems,
         child: SafeArea(
-          child: SingleChildScrollView(
+          // ---------------------------------------------------------
+          // CHANGED: Replaced SingleChildScrollView + Padding + Column
+          // with a single ListView. This fills the screen height.
+          // ---------------------------------------------------------
+          child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  // main heading left aligned:
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'My Library',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: colors.primary,
-                      ),
-                    ),
+            padding: const EdgeInsets.all(16.0), // Padding moved here
+            children: [
+              // main heading left aligned:
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'My Library',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: colors.primary,
                   ),
-                  const SizedBox(height: 16),
-                  // library search bar
-                  CustomSearchBar(
-                    hintText: "Search saved resources...",
-                    controller: controller,
-                    onTap: onTap,
-                    onChanged: _onSearchChanged,
-                    onSubmit: (value) {},
-                  ),
-                  const SizedBox(height: 16),
-                  // saved resources count
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'You have $totalLibraryItems saved resources',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: colors.onSurface.withAlpha(60),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  // listview builder, vertical list of verstile cards
-                  if (filteredItems.isEmpty)
-                    Center(
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 50.0),
-                        child: Text(
-                          searchQuery.isEmpty
-                              ? 'No saved resources yet.'
-                              : 'No results found for "$searchQuery"',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: colors.onSurface.withAlpha(50),
-                          ),
-                        ),
-                      ),
-                    )
-                  else
-                    ListView.builder(
-                      physics: const NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      itemCount: filteredItems.length,
-                      itemBuilder: (context, index) {
-                        final item = filteredItems[index];
-                        final currentUserId =
-                            FirebaseAuth.instance.currentUser?.uid;
-                        final isMyNote = item['uploadedBy'] == currentUserId;
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4.0),
-                          child: VerstileCard(
-                            title: item['title'] ?? 'Untitled',
-                            subtitle: item['description'] ?? 'No description',
-                            onTap: () async {
-                              await context.push(
-                                '/view_resource/${item['id']}',
-                              );
-                              _fetchLibraryItems();
-                            },
-                            cardType: isMyNote ? 'myNote' : 'note',
-                            authorName: item['uploaderName'] ?? 'Unknown',
-                            likesCount: item['likesCount'] ?? 0,
-                            noteId: item['id'],
-                            onRefresh: _fetchLibraryItems,
-                          ),
-                        );
-                      },
-                    ),
-                ],
+                ),
               ),
-            ),
+              const SizedBox(height: 16),
+              // library search bar
+              CustomSearchBar(
+                hintText: "Search saved resources...",
+                controller: controller,
+                onTap: onTap,
+                onChanged: _onSearchChanged,
+                onSubmit: (value) {},
+              ),
+              const SizedBox(height: 16),
+              // saved resources count
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'You have $totalLibraryItems saved resources',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: colors.onSurface.withAlpha(60),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+
+              // ---------------------------------------------------------
+              // CHANGED: Logic for Empty State
+              // Used Container with height instead of Center so it
+              // takes up vertical space to allow scrolling/swiping.
+              // ---------------------------------------------------------
+              if (filteredItems.isEmpty)
+                Container(
+                  height: MediaQuery.of(context).size.height * 0.5,
+                  alignment: Alignment.center,
+                  child: Text(
+                    searchQuery.isEmpty
+                        ? 'No saved resources yet.'
+                        : 'No results found for "$searchQuery"',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: colors.onSurface.withAlpha(50),
+                    ),
+                  ),
+                )
+              else
+                // listview builder, vertical list of verstile cards
+                ListView.builder(
+                  physics: const NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  itemCount: filteredItems.length,
+                  itemBuilder: (context, index) {
+                    final item = filteredItems[index];
+                    final currentUserId =
+                        FirebaseAuth.instance.currentUser?.uid;
+                    final isMyNote = item['uploadedBy'] == currentUserId;
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4.0),
+                      child: VerstileCard(
+                        title: item['title'] ?? 'Untitled',
+                        subtitle: item['description'] ?? 'No description',
+                        onTap: () async {
+                          await context.push('/view_resource/${item['id']}');
+                          _fetchLibraryItems();
+                        },
+                        cardType: isMyNote ? 'myNote' : 'note',
+                        authorName: item['uploaderName'] ?? 'Unknown',
+                        likesCount: item['likesCount'] ?? 0,
+                        noteId: item['id'],
+                        onRefresh: _fetchLibraryItems,
+                      ),
+                    );
+                  },
+                ),
+            ],
           ),
         ),
       ),
