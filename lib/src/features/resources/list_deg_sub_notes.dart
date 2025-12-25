@@ -52,6 +52,7 @@ class _ListDegSubNotesPageState extends State<ListDegSubNotesPage> {
       }
       // CASE 2: Show notes of a subject
       else if (widget.subId != null) {
+        print("the subId is ${widget.subId}");
         items = await note_service.getNotesBySubject(widget.subId!);
         pageTitle = "Notes";
       }
@@ -128,6 +129,11 @@ class _ListDegSubNotesPageState extends State<ListDegSubNotesPage> {
             }
           },
         ),
+        actions: [
+          IconButton(
+            onPressed: () {context.go('/home');}, icon: Icon(Icons.home), color: colors.primary,
+          ),
+        ],
       ),
       floatingActionButton: widget.subId != null
           ? FloatingActionButton(
@@ -138,6 +144,7 @@ class _ListDegSubNotesPageState extends State<ListDegSubNotesPage> {
                 _loadData();
               },
               backgroundColor: colors.primary,
+              shape: const CircleBorder(), // Makes it perfectly round
               child: Icon(Icons.add, color: colors.onPrimary),
             )
           : null,
@@ -159,15 +166,19 @@ class _ListDegSubNotesPageState extends State<ListDegSubNotesPage> {
               itemBuilder: (context, index) {
                 final item = items[index];
                 final cardType = _determineCardType(item);
+                final currentUserId = user_service.getCurrentUserId();
+                final isMyNote = item['uploadedBy'] == currentUserId;
 
                 return VerstileCard(
                   title: item['title'] ?? item['name'] ?? 'Untitled',
-                  subtitle: item['description'] ?? 'No description',
-                  cardType: cardType,
+                  subtitle: item['description'] ?? item['id'] ?? 'No description',
+                  cardType: cardType == 'note' && isMyNote ? 'myNote' : cardType,
                   likesCount: item['likesCount'],
                   resourcesCount: item['notesCount'],
                   authorName: item['uploaderName'],
                   onTap: () => _handleCardTap(item),
+                  noteId: item['id'],
+                  onRefresh: _loadData,
                 );
               },
             ),
