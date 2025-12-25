@@ -187,7 +187,7 @@ class _SearchPageState extends State<SearchPage> {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Explore Departments and Search',
+                    'Search Campus Grid',
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
