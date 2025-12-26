@@ -6,6 +6,7 @@
     <application
         android:label="Campus Grid"
         android:name="${applicationName}"
+        android:requestLegacyExternalStorage="true"
         android:icon="@mipmap/ic_launcher"
         android:enableOnBackInvokedCallback="true">
         

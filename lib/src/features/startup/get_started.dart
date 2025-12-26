@@ -36,104 +36,106 @@ class _GetStartedPageState extends State<GetStartedPage> {
     final colors = Theme.of(context).colorScheme;
 
     return Scaffold(
-      body: Column(
-        children: [
-          const Spacer(flex: 2),
-          Container(
-            width: 340,
-            height: 220,
-            decoration: BoxDecoration(
-              color: colors.primary.withAlpha(20),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Center(
-              child: SvgPicture.asset(getStartedIcon, width: 130, height: 130),
-            ),
-          ),
-          const Spacer(flex: 2),
-
-          Expanded(
-            flex: 3,
-            child: Container(
-              width: double.infinity,
+      body: SafeArea(
+        child: Column(
+          children: [
+            const Spacer(flex: 2),
+            Container(
+              width: 340,
+              height: 220,
               decoration: BoxDecoration(
                 color: colors.primary.withAlpha(20),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(30),
-                  topRight: Radius.circular(30),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withAlpha(30),
-                  ),
-                ],
+                borderRadius: BorderRadius.circular(20),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(30),
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: PageView.builder(
-                        controller: _controller,
-                        onPageChanged: (value) {
-                          setState(() {
-                            _currentPage = value;
-                          });
-                        },
-                        itemCount: getStartedTexts.length,
-                        itemBuilder: (context, index) {
-                          return Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                getStartedTexts[index]['title']!,
-                                style: const TextStyle(
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                getStartedTexts[index]['desc']!,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.grey[600],
-                                  height: 1.5,
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
+              child: Center(
+                child: SvgPicture.asset(getStartedIcon, width: 130, height: 130),
+              ),
+            ),
+            const Spacer(flex: 2),
+        
+            Expanded(
+              flex: 3,
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: colors.primary.withAlpha(20),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withAlpha(30),
                     ),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(
-                        getStartedTexts.length,
-                        (index) => buildDot(index, colors.primary),
-                      ),
-                    ),
-
-                    const SizedBox(height: 40),
-                    CustomButton(
-                      text: _currentPage == 0 ? "Get Started" : _currentPage == 2 ? "Sign Up" : "Next",
-                      trailingIcon: _currentPage == 0 ? Icons.chevron_right : null,
-                      onPressed: () {
-                        if(_currentPage < getStartedTexts.length - 1) {
-                          _controller.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
-                        } else {
-                          context.push('/signup');
-                        }
-                      }
-                    )
                   ],
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(30),
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: PageView.builder(
+                          controller: _controller,
+                          onPageChanged: (value) {
+                            setState(() {
+                              _currentPage = value;
+                            });
+                          },
+                          itemCount: getStartedTexts.length,
+                          itemBuilder: (context, index) {
+                            return Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  getStartedTexts[index]['title']!,
+                                  style: const TextStyle(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  getStartedTexts[index]['desc']!,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.grey[600],
+                                    height: 1.5,
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      ),
+        
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(
+                          getStartedTexts.length,
+                          (index) => buildDot(index, colors.primary),
+                        ),
+                      ),
+        
+                      const SizedBox(height: 40),
+                      CustomButton(
+                        text: _currentPage == 0 ? "Get Started" : _currentPage == 2 ? "Sign Up" : "Next",
+                        trailingIcon: _currentPage == 0 ? Icons.chevron_right : null,
+                        onPressed: () {
+                          if(_currentPage < getStartedTexts.length - 1) {
+                            _controller.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+                          } else {
+                            context.push('/signup');
+                          }
+                        }
+                      )
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
