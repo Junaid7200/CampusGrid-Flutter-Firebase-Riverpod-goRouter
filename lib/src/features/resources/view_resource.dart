@@ -188,12 +188,12 @@ class _ViewResourcePageState extends State<ViewResourcePage> {
           SnackBar(
             // content: Text('Download failed: ${e.toString()}'),
             content: Text('Download failed: This note has no attached file.'),
-            backgroundColor: Colors.red,
+            backgroundColor: Colors.grey[800],
           ),
         );
       }
     } finally {
-      setState(() {
+      setState(() { 
         _isDownloading = false;
         _downloadProgress = 0.0;
       });
