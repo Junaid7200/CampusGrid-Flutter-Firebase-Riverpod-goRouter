@@ -248,7 +248,7 @@ class _NewResourcePageState extends State<NewResourcePage> {
         final response = await cloudinary.uploadFile(
           CloudinaryFile.fromFile(
             _selectedFile!.path,
-            resourceType: CloudinaryResourceType.Auto, // Supports all file types
+            resourceType: CloudinaryResourceType.Raw,
             folder: 'campus_grid/notes',
           ),
         );
