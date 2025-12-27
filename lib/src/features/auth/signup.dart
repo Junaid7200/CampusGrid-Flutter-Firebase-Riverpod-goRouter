@@ -83,7 +83,7 @@ class _SignupPageState extends State<SignupPage> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Login successful! Welcome to Campus Grid.')),
+          SnackBar(content: Text('Signup successful! Welcome to Campus Grid.')),
         );
         context.go('/home');
       }

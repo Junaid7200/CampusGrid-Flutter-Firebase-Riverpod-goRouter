@@ -126,9 +126,3 @@ final GoRouter appRouter = GoRouter(
     ),
   ],
 );
-
-
-
-/*
-the main diff from a react-router data router setup is just that in that we don't define query params explicitly or route params, we just extract them in the component simply. We would just use the useParams hook for route params and useSearchParams hook for query params if we were in react-router, goRouter just has a bit more boilerplate but its essentially the same idea.
-*/ 

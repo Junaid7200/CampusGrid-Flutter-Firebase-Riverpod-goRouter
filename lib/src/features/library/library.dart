@@ -55,9 +55,6 @@ class _LibraryPageState extends State<LibraryPage> {
     });
   }
 
-  void onTap() {
-    // Handle tap event
-  }
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
@@ -68,10 +65,6 @@ class _LibraryPageState extends State<LibraryPage> {
       body: RefreshIndicator(
         onRefresh: _fetchLibraryItems,
         child: SafeArea(
-          // ---------------------------------------------------------
-          // CHANGED: Replaced SingleChildScrollView + Padding + Column
-          // with a single ListView. This fills the screen height.
-          // ---------------------------------------------------------
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(16.0), // Padding moved here
@@ -93,7 +86,6 @@ class _LibraryPageState extends State<LibraryPage> {
               CustomSearchBar(
                 hintText: "Search saved resources...",
                 controller: controller,
-                onTap: onTap,
                 onChanged: _onSearchChanged,
                 onSubmit: (value) {},
               ),
@@ -110,12 +102,6 @@ class _LibraryPageState extends State<LibraryPage> {
                 ),
               ),
               const SizedBox(height: 8),
-
-              // ---------------------------------------------------------
-              // CHANGED: Logic for Empty State
-              // Used Container with height instead of Center so it
-              // takes up vertical space to allow scrolling/swiping.
-              // ---------------------------------------------------------
               if (filteredItems.isEmpty)
                 Container(
                   height: MediaQuery.of(context).size.height * 0.5,

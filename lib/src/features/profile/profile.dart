@@ -35,7 +35,7 @@ class _ProfilePageState extends State<ProfilePage> {
       userObject = await user_service.getCurrentUserProfile();
       setState(() {});
     } catch (e) {
-      print('Error loading profile: $e');
+      // print('Error loading profile: $e');
     } finally {
       setState(() {
         isLoading = false;
@@ -49,24 +49,24 @@ class _ProfilePageState extends State<ProfilePage> {
     });
     try {
       final userId = user_service.getCurrentUserId();
-      print('userId in profile page: $userId');
+      // print('userId in profile page: $userId');
       if (userId != null) {
         userNotes = await note_service.getUserNotes(userId);
         setState(() {});
       }
     } catch (e) {
-      print('Error loading user notes: $e');
+      // print('Error loading user notes: $e');
     } finally {
       setState(() {
         isLoading = false;
       });
     }
-    print('Loaded ${userNotes.length} notes for user.');
+    // print('Loaded ${userNotes.length} notes for user.');
   }
 
   @override
   Widget build(BuildContext context) {
-    print(userObject);
+    // print(userObject);
     final colors = Theme.of(context).colorScheme;
     if (isLoading) {
       return const Center(child: CircularProgressIndicator());
@@ -91,109 +91,119 @@ class _ProfilePageState extends State<ProfilePage> {
                     bottomRight: Radius.circular(20),
                   ),
                 ),
-                child: Column(
-                  children: [
-                    Container(
-                      width: 100,
-                      height: 100,
-                      margin: const EdgeInsets.only(top: 60),
-                      decoration: BoxDecoration(
-                        color: Color(0xFFE3F2FD),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Color(0xFFE3F2FD), width: 4),
-                      ),
-                      child: Icon(
-                        Icons.person,
-                        size: 60,
-                        color: colors.primary,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      '${userObject?['displayName'] ?? 'User Name'}'
-                          .toUpperCase(),
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      '${userObject?['email'] ?? 'unknown email'}',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Column(
-                          children: [
-                            Text(
-                              "${userObject?['notesCount'] ?? '3'}",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              "Uploads",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 100,
+                        height: 100,
+                        margin: const EdgeInsets.only(top: 60),
+                        decoration: BoxDecoration(
+                          color: Color(0xFFE3F2FD),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Color(0xFFE3F2FD),
+                            width: 4,
+                          ),
                         ),
-                        Column(
-                          children: [
-                            Text(
-                              "${userObject?['likesReceived'] ?? '12'}",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              "Total Likes",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
+                        child: Icon(
+                          Icons.person,
+                          size: 60,
+                          color: colors.primary,
                         ),
-                        Column(
-                          children: [
-                            Text(
-                              "${userObject?['savedNotes'] ?? '5'}",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              "Saved",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        '${userObject?['displayName'] ?? 'User Name'}'
+                            .toUpperCase(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
                         ),
-                      ],
-                    ),
-                  ],
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        '${userObject?['email'] ?? 'unknown email'}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Column(
+                            children: [
+                              Text(
+                                "${userObject?['notesCount'] ?? '3'}",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                "Uploads",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Column(
+                            children: [
+                              Text(
+                                "${userObject?['likesReceived'] ?? '12'}",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                "Total Likes",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Column(
+                            children: [
+                              Text(
+                                "${userObject?['savedNotes'] ?? '5'}",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                "Saved",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
               Padding(
@@ -210,7 +220,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     GestureDetector(
                       onTap: () {
-                        // Navigate to upload page
                         context.push('/new_resource');
                       },
                       child: Row(
@@ -256,7 +265,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     authorName: userObject?['displayName'] ?? 'User',
                     cardType: "myNote",
                     onTap: () {
-                      // Navigate to note details
                       context.push('/view_resource/${note['id']}');
                     },
                     noteId: note['id'],

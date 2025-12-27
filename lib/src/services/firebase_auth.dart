@@ -30,27 +30,6 @@ Future<User?> loginWithEmail(String email, String password) async {
   }
 }
 
-// Future<User?> loginWithEmail(String email, String password) async {
-//   try {
-//     final userCredential = await _auth.signInWithEmailAndPassword(
-//       email: email,
-//       password: password,
-//     );
-//     return userCredential.user;
-//   } on FirebaseAuthException catch (e) {
-//     if (e.code == 'user-not-found') {
-//       throw Exception('No user found for that email.');
-//     } else if (e.code == 'wrong-password') {
-//       throw Exception('Wrong password provided.');
-//     } else if (e.code == 'invalid-email') {
-//       throw Exception('Invalid email address.');
-//     }
-//     throw Exception('Login failed: ${e.message}');
-//   } catch (e) {
-//     throw Exception('An error occurred during login.');
-//   }
-// }
-
 Future<User?> signupWithEmail(
   String email,
   String password,

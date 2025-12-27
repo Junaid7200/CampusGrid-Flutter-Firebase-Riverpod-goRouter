@@ -56,7 +56,7 @@ class _SearchPageState extends State<SearchPage> {
     try {
       depts = await department_service.getDepartments();
     } catch (e) {
-      print('Error fetching departments: $e');
+      // print('Error fetching departments: $e');
     }
     setState(() {
       isLoading = false;

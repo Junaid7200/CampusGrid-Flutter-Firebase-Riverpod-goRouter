@@ -76,7 +76,7 @@ class _LoginPageState extends State<LoginPage> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Login successful! Welcome to Campus Grid.')),
+          SnackBar(content: Text('Login successful! Welcome back to Campus Grid.')),
         );
         context.go('/home');
       }
