@@ -257,28 +257,20 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 )
               else
-                SizedBox(
-                  height: 400, // Fixed height - adjust as needed
-                  child: ListView.builder(
-                    itemCount: userNotes.length,
-                    padding: EdgeInsets.zero,
-                    itemBuilder: (context, index) {
-                      final note = userNotes[index];
-                      return VerstileCard(
-                        title: note['title'] ?? 'Untitled',
-                        subtitle: note['description'] ?? '',
-                        likesCount: note['likesCount'] ?? 0,
-                        authorName: userObject?['displayName'] ?? 'User',
-                        cardType: "myNote",
-                        onTap: () {
-                          context.push('/view_resource/${note['id']}');
-                        },
-                        noteId: note['id'],
-                        onRefresh: _loadUserNotes,
-                      );
+                ...userNotes.map((note) {
+                  return VerstileCard(
+                    title: note['title'] ?? 'Untitled',
+                    subtitle: note['description'] ?? '',
+                    likesCount: note['likesCount'] ?? 0,
+                    authorName: userObject?['displayName'] ?? 'User',
+                    cardType: "myNote",
+                    onTap: () {
+                      context.push('/view_resource/${note['id']}');
                     },
-                  ),
-                ),
+                    noteId: note['id'],
+                    onRefresh: _loadUserNotes,
+                  );
+                }).toList(),
               SizedBox(height: 16),
               Card(
                 elevation: 2,
