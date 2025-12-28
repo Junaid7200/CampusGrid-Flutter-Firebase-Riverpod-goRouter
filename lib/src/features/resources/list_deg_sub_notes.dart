@@ -153,12 +153,14 @@ class _ListDegSubNotesPageState extends State<ListDegSubNotesPage> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : items.isEmpty
-          ? Center(
-              child: Text(
-                'No items found',
-                style: TextStyle(fontSize: 18, color: colors.primary),
+          ? SafeArea(
+            child: Center(
+                child: Text(
+                  'No items found',
+                  style: TextStyle(fontSize: 18, color: colors.primary),
+                ),
               ),
-            )
+          )
           : ListView.builder(
               padding: const EdgeInsets.only(top: 16),
               itemCount: items.length,

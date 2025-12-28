@@ -10,6 +10,7 @@ class LibraryPage extends StatefulWidget {
   final String? query;
   final String? sort;
 
+  @override
   State<LibraryPage> createState() => _LibraryPageState();
 }
 
@@ -21,6 +22,7 @@ class _LibraryPageState extends State<LibraryPage> {
   int totalLibraryItems = 0;
   bool isLoading = false;
 
+  @override
   void initState() {
     super.initState();
     _fetchLibraryItems();
@@ -67,9 +69,8 @@ class _LibraryPageState extends State<LibraryPage> {
         child: SafeArea(
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(16.0), // Padding moved here
+            padding: const EdgeInsets.all(16.0),
             children: [
-              // main heading left aligned:
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
@@ -82,7 +83,6 @@ class _LibraryPageState extends State<LibraryPage> {
                 ),
               ),
               const SizedBox(height: 16),
-              // library search bar
               CustomSearchBar(
                 hintText: "Search saved resources...",
                 controller: controller,
@@ -90,7 +90,6 @@ class _LibraryPageState extends State<LibraryPage> {
                 onSubmit: (value) {},
               ),
               const SizedBox(height: 16),
-              // saved resources count
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
@@ -117,7 +116,6 @@ class _LibraryPageState extends State<LibraryPage> {
                   ),
                 )
               else
-                // listview builder, vertical list of verstile cards
                 ListView.builder(
                   physics: const NeverScrollableScrollPhysics(),
                   shrinkWrap: true,

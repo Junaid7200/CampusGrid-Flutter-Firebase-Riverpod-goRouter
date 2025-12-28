@@ -11,6 +11,7 @@ import 'dart:io';
 class ViewResourcePage extends StatefulWidget {
   const ViewResourcePage({super.key, required this.resourceId});
   final String resourceId;
+  @override
   State<ViewResourcePage> createState() => _ViewResourcePageState();
 }
 
@@ -43,7 +44,7 @@ class _ViewResourcePageState extends State<ViewResourcePage> {
         _isLoading = false;
       });
     } catch (e) {
-      print('Error loading resource: $e');
+      // print('Error loading resource: $e');
       setState(() => _isLoading = false);
     }
   }
@@ -131,34 +132,26 @@ class _ViewResourcePageState extends State<ViewResourcePage> {
     });
 
     try {
-      // 1. Request Permission
       if (Platform.isAndroid) {
         var status = await Permission.storage.status;
         if (!status.isGranted) {
           status = await Permission.storage.request();
         }
-
-        // On Android 13+, storage permission is sometimes not needed
-        // for writing to public downloads, but it's good practice to check.
       }
 
-      // 2. Determine the correct Save Path (Public Downloads for Android)
       Directory? directory;
       if (Platform.isAndroid) {
         directory = Directory('/storage/emulated/0/Download');
-        // If the directory doesn't exist (rare), fallback to documents
         if (!await directory.exists()) {
           directory = await getExternalStorageDirectory();
         }
       } else {
-        // iOS: Use documents (Users access this via Files app if UIFileSharingEnabled is true)
         directory = await getApplicationDocumentsDirectory();
       }
 
       final savePath = '${directory!.path}/${note['fileName']}';
-      print("Saving to: $savePath"); // Debug print to see the path
+      // print("Saving to: $savePath"); // Debug print to see the path
 
-      // 3. Download
       final dio = Dio();
       await dio.download(
         note['fileUrl'],
