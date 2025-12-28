@@ -36,8 +36,6 @@ Future<List<Map<String, dynamic>>> getNotesBySubject(String subId) async {
   final snapshot = await _firestore
       .collection('note')
       .where('subId', isEqualTo: subId)
-      // Note: If you get index error, create composite index in Firebase Console
-      // or temporarily comment out orderBy below
       // .orderBy('createdAt', descending: true)
       .get();
 
@@ -51,7 +49,7 @@ Future<List<Map<String, dynamic>>> getUserNotes(String userId) async {
   final snapshot = await _firestore
       .collection('note')
       .where('uploadedBy', isEqualTo: userId)
-      // .orderBy('createdAt', descending: true) // i removed this and then it worked in the profiles page weirdly
+      // .orderBy('createdAt', descending: true) // i removed this and then it worked in the profiles page weirdly so yeah, weird shit
       .get();
 
   return snapshot.docs.map((doc) {
@@ -66,7 +64,6 @@ Future<Map<String, dynamic>?> getNoteById(String noteId) async {
   return {'id': doc.id, ...doc.data()!};
 }
 
-// Create a note (NO dptId, degId - they're not in your schema!)
 Future<String> createNote({
   required String title,
   required String description,
